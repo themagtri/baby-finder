@@ -515,7 +515,7 @@ function clubTags(i){
   const cs = CLUBS[i.s]||[];
   if(!cs.length) return "";
   const v=cs.filter(c=>c.k==="voucher"), d=cs.filter(c=>c.k!=="voucher");
-  const row=(lbl,list)=> list.length ? `<span class="lbl2">${lbl}</span>${list.map(c=>`<span class="club">${esc(c.n)}</span>`).join("")}` : "";
+  const row=(lbl,list)=> list.length ? `<span class="lbl2">${lbl}</span>${list.map(c=>`<span class="club">${esc(c.n)}${c.on===0?' <small>(בחנויות בלבד)</small>':""}</span>`).join("")}` : "";
   return `<div class="clubs">${row("אפשר לשלם ב:",v)}${row("הטבה במועדון:",d)}</div>`;
 }
 function card(i, idx){
