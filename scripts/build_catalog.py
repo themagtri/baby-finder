@@ -20,7 +20,8 @@ FIELDS = ["cat", "type", "seat_group", "brand", "model", "subtitle", "seller", "
           "height_max_cm", "weight_max_kg", "fold", "import_status", "checked", "source_id", "price_note"]
 
 SELLER_NAME = {"besafe": "BeSafe ישראל", "segal": "סגל בייבי", "babyjogger": "Baby Jogger ישראל", "joie": "Joie ישראל",
-               "cybex": "Cybex ישראל", "chicco": "Chicco ישראל"}
+               "cybex": "Cybex ישראל", "chicco": "Chicco ישראל",
+               "shilav": "שילב", "babystar": "בייבי סטאר", "motzetzim": "מוצצים", "agalease": "עגליס", "minena": "מיננה"}
 
 
 def clean(s):

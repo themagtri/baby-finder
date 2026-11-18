@@ -148,6 +148,62 @@ def chicco_rows(prods, base):
     return rows
 
 
+# ---- multi-brand chains (Shilav, Baby Star, Motzetzim, Agalease, Minena) ----
+BRANDS = ["Cybex", "Chicco", "Joie", "BeSafe", "Bugaboo", "Nuna", "Maxi-Cosi", "UPPAbaby", "Stokke", "Babyzen",
+          "YOYO", "Baby Jogger", "Britax", "Peg Perego", "Inglesina", "Joolz", "Silver Cross", "Kinderkraft",
+          "Graco", "Evenflo", "Doona", "Thule", "Recaro", "Mutsy", "Bumprider", "Twigy", "Safety 1st", "Petite"]
+BRANDS_HE = {"סייבקס": "Cybex", "צ'יקו": "Chicco", "ציקו": "Chicco", "ג'ואי": "Joie", "בי סייף": "BeSafe",
+             "בוגבו": "Bugaboo", "נונה": "Nuna", "מקסי קוזי": "Maxi-Cosi", "סטוקי": "Stokke", "יויו": "YOYO",
+             "בריטקס": "Britax", "פג פרגו": "Peg Perego", "אינגלזינה": "Inglesina", "ג'ולז": "Joolz",
+             "סילבר קרוס": "Silver Cross", "קינדרקראפט": "Kinderkraft", "גרקו": "Graco", "דונה": "Doona"}
+ACCESSORY_ANY = r"מתאם|תיק|שמשי|כיסוי|כילה|כילת|פגוש|מזרן|בסיס לסלקל|בסיס איזופיקס|מראה|ארגונית|מחזיק כוס|שק שינה|מגן"
+
+
+def brand_of(name):
+    low = name.lower()
+    for b in BRANDS:
+        if b.lower() in low: return b
+    for he, b in BRANDS_HE.items():
+        if he in name: return b
+    return ""
+
+
+def kind_of(name):
+    """Category from the seller's own product name. A known model (Cybex/Chicco tables) wins; car-seat group stays
+    empty when the name does not say it (the age-stage filter then hides it rather than guessing)."""
+    fam = next((f for f in CYBEX if re.search(f[0], name, re.I)), None)
+    if fam: return fam[2], fam[3]
+    ch = next((c for c in CHICCO if c[0].lower() in name.lower()), None)
+    if ch: return ch[2], ch[3]
+    if re.search(r"בוסטר|booster", name, re.I): return "carseat", "booster"
+    if re.search(r"סלקל", name): return "carseat", "infant"
+    if re.search(r"כסא בטיחות|כיסא בטיחות|מושב בטיחות|car seat", name, re.I): return "carseat", ""
+    if re.search(r"תאומים|twin|double|duo", name, re.I): return "stroller", "twin"
+    if re.search(r"משולבת|סל שכיבה|אמבטיה|עריסה|trio|travel system", name, re.I): return "stroller", "full"
+    if re.search(r"טיולון", name): return "stroller", "travel"
+    if re.search(r"עגלה|עגלת|stroller", name, re.I): return "stroller", "stroller"
+    return None, None
+
+
+def chain_rows(seller, prods, base):
+    rows = []
+    for p in prods:
+        nm = p["name"]
+        if re.search(ACCESSORY_ANY, nm): continue
+        cat, kind = kind_of(nm)
+        if not cat: continue
+        price, preg, note = price_fields(p)
+        kw = dict(cat=cat, brand=brand_of(nm), model=nm, subtitle=SUB.get(kind, ""), price=n(price), price_reg=n(preg),
+                  price_note=note, in_stock=int(not p.get("oos")), url=p["url"], source_id=p["source_file"])
+        if cat == "stroller": kw["type"] = kind
+        else: kw["seat_group"] = kind
+        rows.append(base(seller, **kw))
+    return rows
+
+
+CHAINS = ("shilav", "babystar", "motzetzim", "agalease", "minena")
+
+
 def from_manual(base_fn):
     p = ROOT / "data" / "raw" / "manual.json"
     if not p.exists():
@@ -155,5 +211,8 @@ def from_manual(base_fn):
     d = json.loads(p.read_text(encoding="utf-8"))
     b = lambda seller, **kw: base_fn(seller, d["fetched"], **kw)
     prods = d["products"]
-    return cybex_rows([x for x in prods if x["seller"] == "cybex"], b) + \
+    rows = cybex_rows([x for x in prods if x["seller"] == "cybex"], b) + \
         chicco_rows([x for x in prods if x["seller"] == "chicco"], b)
+    for ch in CHAINS:
+        rows += chain_rows(ch, [x for x in prods if x["seller"] == ch], b)
+    return rows

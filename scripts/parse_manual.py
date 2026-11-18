@@ -13,7 +13,9 @@ import pymupdf as fitz
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DEFAULT = pathlib.Path(r"C:\Users\USER\Desktop\עגלות וכסאות בטיחות")
 
-SELLERS = {"cybexonline.co.il": "cybex", "chiccoisrael.co.il": "chicco"}
+SELLERS = {"cybexonline.co.il": "cybex", "chiccoisrael.co.il": "chicco", "shilav.co.il": "shilav",
+           "baby-star.co.il": "babystar", "motsesim.co.il": "motzetzim", "agalease-baby.co.il": "agalease",
+           "minene.co.il": "minena", "minena.co.il": "minena"}
 NUM = r"([\d,]+(?:\.\d+)?)"
 
 
@@ -49,7 +51,7 @@ def parse_pdf(path):
         for l in page.get_links():
             u = l.get("uri") or ""
             host = urllib.parse.urlparse(u).netloc.replace("www.", "")
-            if host in SELLERS and ("/products/" in u or "/product/" in u):
+            if host in SELLERS and re.search(r"/products?/", u):
                 name = " ".join(page.get_textbox(l["from"]).split())
                 if name:
                     links.append((l["from"], u, host, name))
@@ -72,7 +74,7 @@ def parse_pdf(path):
 def main(folder):
     folder = pathlib.Path(folder)
     all_items = []
-    for f in sorted(folder.glob("*.pdf")):
+    for f in sorted(folder.rglob("*.pdf")):
         got = parse_pdf(f)
         print(f"{f.name[:55]:55} {len(got)} products", file=sys.stderr)
         all_items += got
@@ -82,7 +84,7 @@ def main(folder):
         if k not in by_url or len(it) > len(by_url[k]): by_url[k] = it
     out = ROOT / "data" / "raw" / "manual.json"
     out.parent.mkdir(parents=True, exist_ok=True)
-    mtime = max(f.stat().st_mtime for f in folder.glob("*.pdf"))
+    mtime = max(f.stat().st_mtime for f in folder.rglob("*.pdf"))
     out.write_text(json.dumps({"fetched": time.strftime("%Y-%m-%d", time.localtime(mtime)),
                                "products": list(by_url.values())}, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"saved {len(by_url)} products -> {out.relative_to(ROOT)}", file=sys.stderr)
