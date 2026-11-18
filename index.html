@@ -95,6 +95,7 @@ section.screen.on{display:block;animation:fade .35s ease}
 .tile{position:relative;border:0;padding:0;border-radius:var(--r);overflow:hidden;cursor:pointer;min-height:220px;text-align:right;background:#cdbfb4 center/cover no-repeat;display:flex;align-items:flex-end;isolation:isolate;box-shadow:var(--shadow);transition:transform .25s ease}
 .tiles.two .tile{min-height:300px}
 .tiles.quad{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tiles.quad .tile[data-wide]{grid-column:1/-1;min-height:160px}
 .tile::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(10,10,10,0) 25%,rgba(10,10,10,.72) 100%)}
 .tile:hover{transform:translateY(-3px)}
 .tile .txt{color:#fff;padding:18px 20px;width:100%}
@@ -335,9 +336,9 @@ const PH = {
   hero:"1733380005522-b8d76ce49d13", stroller:"1760160639570-e682e4595f86", carseat:"1619719287848-883c8f26efbc",
   t_full:"1636384919179-d936e55c5cca", t_stroller:"1784751722840-471e603b467f", t_travel:"1773063082298-91b61b59bc99",
   t_twin:"1744424846144-d57267a19ee8", t_carseatstroller:"1611223355350-5be15e624fdf",
-  s_newborn:"1773243086679-20c427d28092", s_toddler:"1633111046443-13a0c30033ea",
+  s_newborn:"1619719287848-883c8f26efbc", s_toddler:"1633111046443-13a0c30033ea",
   // every age tile shows a child or toy in a car seat / belted (no unbelted children in a car-seat context)
-  s_kid4:"1785224928043-113fac5b7e51", s_kid7:"1790243637140-2aa6f40b909b",
+  s_kid4:"1785224928043-113fac5b7e51", s_kid7:"1790243637140-2aa6f40b909b", s_infant:"1773243086679-20c427d28092",
   g_infant:"1619719287848-883c8f26efbc", g_convertible:"1633111046443-13a0c30033ea", g_toddler:"1633111046443-13a0c30033ea", g_booster:"1761047321481-abbdcfb7ff00",
   budget:"1510154221590-ff63e90a136f"
 };
@@ -377,6 +378,10 @@ const STAGES = [
   {k:"kid4", he:"מגיל 4 ועד 7", sub:"", test:(i)=> covers(i,66) ?? byGroup(i,"kid4")},
   {k:"kid7", he:"מגיל 7 ומעלה", sub:"", test:(i)=> covers(i,96) ?? byGroup(i,"kid7")}
 ];
+// age tiles show car seats only; infant carriers are their own option ("סלקלים"), first and full width.
+// A seat whose stated range covers several ages appears under each of them.
+for(const st of STAGES){ const t=st.test; st.test = i => i.g==="infant" ? false : t(i); }
+STAGES.unshift({k:"infant", he:"סלקלים", sub:"מושב נישא לתינוק, מגיל לידה", wide:1, test:(i)=> i.g==="infant"});
 function covers(i,m){ if(i.a0==null||i.a1==null) return null; return i.a0<=m && i.a1>=m; }
 // when the seller states no age range, the stage follows the seat type (tagging only; the card still says "לא צוין")
 const GROUP_STAGES = {infant:["newborn"], convertible:["newborn","toddler"], toddler:["toddler","kid4"], booster:["kid4","kid7"]};
@@ -462,7 +467,7 @@ function renderPrefs(){
   } else {
     $("#stageOpts").innerHTML = STAGES.map(s=>{
       const n = poolNeed().filter(i=>s.test(i)===true).length;
-      return tile(`data-stage="${s.k}"`, PH["s_"+s.k], s.he, s.sub, nf.format(n)+" מושבים", S.stage===s.k);
+      return tile(`data-stage="${s.k}"${s.wide?' data-wide="1"':""}`, PH["s_"+s.k], s.he, s.sub, nf.format(n)+(s.k==="infant"?" סלקלים":" כסאות"), S.stage===s.k);
     }).join("");
   }
 }
