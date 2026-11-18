@@ -71,10 +71,77 @@ def parse_shilav(doc, path):
     return out
 
 
+CARD_HOSTS = {"agalease-baby.co.il": "agalease", "baby-star.co.il": "babystar", "motsesim.co.il": "motzetzim"}
+NOISE = re.compile(r"https?:|www\.|filter|\?|שיווק ופרסום|צדדים שלישיים|שותפי|הסכמה|עוגיות|שימוש באתר|הגלישה|מדיניות|cookies|הנחה|^מבצע$|השוואת מוצרים|^\d+/$|^[()]$|אזל|חדש באתר|יבואן רשמי|יבוא רשמי|יבוא מקביל|^\d+\+$|₪|^\d+%")
+
+
+LABEL = re.compile(r"^(טיולונים|כסאות בטיחות|כיסאות בטיחות|עגלות תינוק|עגלות תאומים|תאומים / אחים|"
+                   r"עגלות תאומים / אחים|סלקלים|בוסטרים)$|נעזור לכם|לשימושים")
+
+
+def parse_cards(doc, path):
+    """Agalease / Baby Star / Motzetzim category PDFs: a product is several link pieces (image, badge, title).
+    Join all pieces of one URL into one card area (also across a page break), read its words in RTL order
+    (scripts/rtl_text.py), then take name / prices / stock / import status from the card's lines."""
+    sys.path.insert(0, str(pathlib.Path(__file__).parent))
+    from rtl_text import lines_in
+    cards = {}
+    for pno, page in enumerate(doc):
+        per = {}
+        for l in page.get_links():
+            u = l.get("uri") or ""
+            host = urllib.parse.urlparse(u).netloc.replace("www.", "")
+            if host in CARD_HOSTS and "/products/" in u:
+                key = "https://" + host + "/products/" + u.split("/products/")[1].split("?")[0].strip("/")
+                per.setdefault((key, host), []).append(fitz.Rect(l["from"]))
+        for (key, host), rs in per.items():
+            r = rs[0]
+            for x in rs[1:]: r |= x
+            area = fitz.Rect(r.x0 - 3, r.y0, r.x1 + 3, min(r.y1 + 45, page.rect.y1))
+            c = cards.setdefault(key, {"seller": CARD_HOSTS[host], "lines": []})
+            for ln in lines_in(page, area):
+                ln = " ".join(ln.split())
+                if ln not in c["lines"]: c["lines"].append(ln)
+    out = []
+    for url, c in cards.items():
+        ls = c["lines"]
+        text = "\n".join(ls)
+        it = {"seller": c["seller"], "url": url, "source_file": path.name}
+        names = [l for l in ls if not NOISE.search(l) and len(l) > 6 and re.search(r"[֐-׿A-Za-z]{3}", l)]
+        brand_line = next((l for l in ls if "|" in l and len(l) < 40), "")
+        names = [l for l in names if l != brand_line]
+        if not names: continue
+        # the title = clean lines right before the first price, walking back until a category label / sentence
+        first_price = next((i for i, l in enumerate(ls) if "₪" in l), len(ls))
+        before = []
+        for l in reversed(ls[:first_price]):
+            if LABEL.search(l) or "." in l or len(l) > 70: break
+            if l in names and l not in before: before.insert(0, l)
+        it["name"] = (" ".join(before) if before else max(names, key=len)).replace(" ' ", "'")
+        it["brand_hint"] = brand_line
+        vals = [money(v) for v in re.findall(r"₪\s*" + NUM, text) if money(v) >= 20]
+        club = re.search(r"₪\s*" + NUM + r"\s*מחיר לחברי מועדון", text)
+        if club:
+            it["club"] = money(club.group(1)); rest = [v for v in vals if v != it["club"]]
+            if rest: it["regular"] = max(rest)
+        elif len(vals) >= 2:
+            it["regular"], it["sale"] = max(vals[:2]), min(vals[:2])
+            if it["regular"] == it["sale"]: it.pop("sale")
+        elif vals:
+            it["regular"] = vals[0]
+        if re.search(r"אזל", text): it["oos"] = True
+        if re.search(r"יבואן רשמי|יבוא רשמי", text): it["import"] = "official"
+        elif "יבוא מקביל" in text: it["import"] = "parallel"
+        out.append(it)
+    return out
+
+
 def parse_pdf(path):
     doc = fitz.open(path)
     if "shilav" in path.name.lower():
         return parse_shilav(doc, path)
+    if re.search(r"עגליס|בייביסטאר|מוצצים", path.name):
+        return parse_cards(doc, path)
     items = []
     for page in doc:
         links = []
