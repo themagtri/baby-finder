@@ -171,7 +171,7 @@ def from_joie():
             rot = 1 if grp != "infant" and re.search(r"מסתובב|360|סיבוב (?:מלא|חלק|של)", text) else ""
             std = STD.get(p.get("standard") or "", p.get("standard") or "")
             if std == "R44/04" and "R129" in text.upper().replace(" ", ""):
-                std = ""  # page text and structured data disagree -> unknown
+                std = "?"  # page text and structured data disagree -> unknown ("?" stops name_facts filling it)
             rows.append(base("joie", d["fetched"], cat="carseat", seat_group=grp,
                              standard=std,
                              isofix={"included": "included", "optional": "optional", "without": "without"}.get(p.get("isofix") or "", ""),
@@ -242,6 +242,41 @@ GENERIC = set("""עגלת עגלה עגלות תינוק טיולון כיסא �
 הזמנה מוקדמת - / + של עם צבע i""".split())
 
 
+ISO_NO = re.compile(r"ללא (?:חיבור )?(?:איזופיקס|isofix)", re.I)
+ISO_BASE_SEP = re.compile(r"ללא בסיס|בסיס (?:נמכר )?בנפרד", re.I)
+ISO_YES = re.compile(r"איזופיקס|isofix|i-?fix|kidfix|rodifix|isofit|iso-?fix", re.I)
+STD_RULES = [(re.compile(r"i[- ]?size|r ?129", re.I), "R129"), (re.compile(r"r ?44", re.I), "R44/04"),
+             (re.compile(r"fmvss", re.I), "FMVSS 213")]
+ROT = re.compile(r"מסתובב|360|360|swivel|סיבוב", re.I)
+
+
+def name_facts(rows):
+    """The product name is the seller's own text: if it states ISOFIX / standard / rotation, use it.
+    Fill only empty fields; when the name contradicts a value we already have, keep ours and report it
+    (printed for manual review)."""
+    conflicts = []
+    for r in rows:
+        if r["cat"] != "carseat":
+            continue
+        nm = r["model"]
+        iso = "without" if ISO_NO.search(nm) else ("optional" if ISO_BASE_SEP.search(nm) else ("included" if ISO_YES.search(nm) else ""))
+        std = next((v for rx, v in STD_RULES if rx.search(nm)), "")
+        rot = "1" if r["seat_group"] != "infant" and ROT.search(nm) else ""
+        for field, val in (("isofix", iso), ("standard", std), ("rotating", rot)):
+            if not val:
+                continue
+            cur = str(r.get(field) or "")
+            if not cur:
+                r[field] = val
+            elif cur != val:
+                conflicts.append((r["seller"], nm, field, cur, val))
+    for r in rows:   # seller contradicts itself -> shown as unknown
+        if r.get("standard") == "?": r["standard"] = ""
+    for c in conflicts:
+        print("  NAME CONFLICT", c, file=sys.stderr)
+    return conflicts
+
+
 def merge_colours(rows):
     """One card per model per seller per price (owner: no card per colour, say 'מגוון צבעים').
     Key = seller + brand + category + type + both prices + model (canonical family if known, else the first two
@@ -284,6 +319,7 @@ def main():
     ovs = overrides()
     rows = from_woo("besafe", "BeSafe", ovs) + from_woo("segal", "Stokke", ovs) + \
         from_woo("babyjogger", "Baby Jogger", ovs) + from_joie() + from_manual(base) + from_superpharm()
+    conflicts = name_facts(rows)
     for r in rows:
         r["family"] = family(r)
     rows = merge_colours(rows)
