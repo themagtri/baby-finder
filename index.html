@@ -269,9 +269,6 @@ body.still *{animation:none!important;transition:none!important}
       <p class="lead">המידע על כל מושב מועתק מדף המוצר של המוכר. איננו ממליצים על בטיחות ואיננו מדרגים מושבים.</p>
       <h2 class="q" id="qStage">בן או בת כמה הילד?</h2>
       <div class="tiles quad" id="stageOpts" role="group" aria-labelledby="qStage"></div>
-      <h2 class="q" id="qSeat">דרישות, לפי מה שהמוכר כותב</h2>
-      <div class="opt-row" id="seatReq" role="group" aria-labelledby="qSeat"></div>
-      <p class="note" id="seatReqNote"></p>
     </div>
     <p class="photo-credit">צילומים להמחשה: Unsplash</p>
   </section>
@@ -467,9 +464,6 @@ function renderPrefs(){
       const n = poolNeed().filter(i=>s.test(i)===true).length;
       return tile(`data-stage="${s.k}"`, PH["s_"+s.k], s.he, s.sub, nf.format(n)+" מושבים", S.stage===s.k);
     }).join("");
-    $("#seatReq").innerHTML = REQS.map(r=>`<button class="opt" type="button" data-req="${r.k}" aria-pressed="${S.reqs.has(r.k)}">${r.he}</button>`).join("");
-    const {hiddenUnknown} = filtered({ignoreBudget:true});
-    $("#seatReqNote").textContent = hiddenUnknown ? `${hiddenUnknown} מושבים לא מוצגים כי המוכר לא ציין את אחד הנתונים שבחרתם (גיל, תקן, ISOFIX או סיבוב).` : "";
   }
 }
 function priceBounds(){
