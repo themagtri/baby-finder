@@ -8,6 +8,8 @@ Rules (CLAUDE.md):
 Usage: python -I scripts/build_catalog.py      (run from repo root)
 """
 import csv, html, json, pathlib, re, sys, datetime
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from manual_source import from_manual
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 RAW = ROOT / "data" / "raw"
@@ -15,9 +17,10 @@ TODAY = datetime.date.today()
 
 FIELDS = ["cat", "type", "seat_group", "brand", "model", "subtitle", "seller", "seller_name", "price", "price_reg",
           "in_stock", "url", "standard", "isofix", "rotating", "age_from_m", "age_to_m", "height_min_cm",
-          "height_max_cm", "weight_max_kg", "fold", "import_status", "checked", "source_id"]
+          "height_max_cm", "weight_max_kg", "fold", "import_status", "checked", "source_id", "price_note"]
 
-SELLER_NAME = {"besafe": "BeSafe ישראל", "segal": "סגל בייבי", "babyjogger": "Baby Jogger ישראל", "joie": "Joie ישראל"}
+SELLER_NAME = {"besafe": "BeSafe ישראל", "segal": "סגל בייבי", "babyjogger": "Baby Jogger ישראל", "joie": "Joie ישראל",
+               "cybex": "Cybex ישראל", "chicco": "Chicco ישראל"}
 
 
 def clean(s):
@@ -63,7 +66,7 @@ def stroller_type(name, cats):
     c = " ".join(cats)
     if "תאומים" in c or "תאומים" in name or "Double" in name or "twin" in name.lower():
         return "twin"
-    if re.search(r"trio|travel system|ramble|ניובורן|סל שכיבה|אמבטיה", name, re.I):
+    if re.search(r"trio|travel system|ramble|ניובורן|סל שכיבה|אמבטיה|משולבת", name, re.I):
         return "full"
     if "טיולון" in name or "טיולונים" == c or "אולטרה קומפקט" in c:
         return "travel"
@@ -177,7 +180,7 @@ def from_joie():
 def main():
     ovs = overrides()
     rows = from_woo("besafe", "BeSafe", ovs) + from_woo("segal", "Stokke", ovs) + \
-        from_woo("babyjogger", "Baby Jogger", ovs) + from_joie()
+        from_woo("babyjogger", "Baby Jogger", ovs) + from_joie() + from_manual(base)
     rows.sort(key=lambda r: (r["cat"], r["seller"], r["model"]))
     out = ROOT / "data" / "catalog.csv"
     with open(out, "w", encoding="utf-8", newline="") as f:

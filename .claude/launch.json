@@ -4,7 +4,11 @@
     {
       "name": "site",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8791", "--bind", "127.0.0.1"],
+      "runtimeArgs": [
+        "-I",
+        "scripts/serve.py",
+        "8791"
+      ],
       "port": 8791,
       "autoPort": false
     }
