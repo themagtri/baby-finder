@@ -514,7 +514,7 @@ function facts(i){
     f.push(["תקן", i.std? V(esc(STD_HE[i.std]||i.std)) : U]);
     f.push(["גיל", i.a0!=null ? V(i.a1!=null ? `${fmtAge(i.a0)} עד ${fmtAge(i.a1)}` : `מ${fmtAge(i.a0)}`) : U]);
     f.push(["ISOFIX", i.iso? V(ISO_HE[i.iso]) : U]);
-    f.push(["מסתובב", i.rot===1? V("כן") : U]);
+    if(i.rot===1) f.push(["מסתובב", V("כן")]);   // shown only when the seller states it
     if(i.h0!=null) f.push(["גובה הילד", V(`${i.h0}–${i.h1} ס"מ`)]);
     else if(i.w1!=null) f.push(["משקל הילד עד", V(`${i.w1} ק"ג`)]);
   } else {
