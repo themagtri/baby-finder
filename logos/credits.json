@@ -1,0 +1,34 @@
+{
+ "Chicco": {
+  "file": "logos/chicco.svg",
+  "commons_title": "File:Chicco.svg",
+  "source_page": "https://commons.wikimedia.org/wiki/File:Chicco.svg",
+  "license": "Public domain",
+  "author": "Andrea Pergamino",
+  "checked": "2026-11-18: description/category confirm this brand; licence PD textlogo"
+ },
+ "Graco": {
+  "file": "logos/graco.svg",
+  "commons_title": "File:Graco logo.svg",
+  "source_page": "https://commons.wikimedia.org/wiki/File:Graco_logo.svg",
+  "license": "Public domain",
+  "author": "Graco",
+  "checked": "2026-11-18: description/category confirm this brand; licence PD textlogo"
+ },
+ "Recaro": {
+  "file": "logos/recaro.svg",
+  "commons_title": "File:Recaro Logo.svg",
+  "source_page": "https://commons.wikimedia.org/wiki/File:Recaro_Logo.svg",
+  "license": "Public domain",
+  "author": "RECARO Beteiligungs-GmbH.",
+  "checked": "2026-11-18: description/category confirm this brand; licence PD textlogo"
+ },
+ "Thule": {
+  "file": "logos/thule.svg",
+  "commons_title": "File:Thule Group Logo.svg",
+  "source_page": "https://commons.wikimedia.org/wiki/File:Thule_Group_Logo.svg",
+  "license": "Public domain",
+  "author": "Thule Group AB",
+  "checked": "2026-11-18: description/category confirm this brand; licence PD textlogo"
+ }
+}

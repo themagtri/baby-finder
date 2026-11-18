@@ -175,6 +175,7 @@ section.screen.on{display:block;animation:fade .35s ease}
 .badge.sp{background:var(--navy);color:#fff}
 .badge.imp{background:var(--sky);color:var(--navy)}
 .item .body{padding:16px;display:flex;flex-direction:column;gap:10px;flex:1}
+.logo-img{height:20px;width:auto;max-width:100px;display:block}
 .brand{font-size:.72rem;font-weight:700;letter-spacing:.12em;color:var(--muted)}
 .item h3{margin:0;font-family:var(--serif);font-weight:500;font-size:1.15rem;line-height:1.3}
 .item .sub{margin:0;color:var(--muted);font-size:.9rem}
@@ -300,7 +301,7 @@ body.still *{animation:none!important;transition:none!important}
 
   <footer class="credits">
     <div>המחירים והמלאי נאספו מאתרי המוכרים ב-<span id="chkDate"></span> ועשויים להשתנות. המחיר והתנאים הקובעים הם אלה שבאתר המוכר.</div>
-    <div>כל דגם מוצג בכרטיס נפרד לכל מוכר. מיקום ממומן, אם יהיה, יסומן "ממומן". התמונות באתר הן תמונות להמחשה מ-Unsplash, ולא תמונות של המוצרים עצמם. הסימנים המסחריים שייכים לבעליהם ומוצגים לזיהוי בלבד.</div>
+    <div>כל דגם מוצג בכרטיס נפרד לכל מוכר. מיקום ממומן, אם יהיה, יסומן "ממומן". התמונות באתר הן תמונות להמחשה מ-Unsplash, ולא תמונות של המוצרים עצמם. לוגואים: Wikimedia Commons, קבצים בנחלת הכלל (פירוט ב-<a href="logos/credits.json">logos/credits.json</a>). הסימנים המסחריים שייכים לבעליהם ומוצגים לזיהוי בלבד.</div>
     <nav aria-label="מסמכים"><a href="privacy.html">מדיניות פרטיות</a><a href="terms.html">תנאי שימוש</a><a href="accessibility.html">הצהרת נגישות</a></nav>
   </footer>
 </div>
@@ -336,6 +337,8 @@ const PH = {
   g_infant:"1619719287848-883c8f26efbc", g_convertible:"1633111046443-13a0c30033ea", g_toddler:"1633111046443-13a0c30033ea", g_booster:"1761047321481-abbdcfb7ff00",
   budget:"1510154221590-ff63e90a136f"
 };
+// brand logos: Wikimedia Commons, public-domain files only, each checked by hand (logos/credits.json)
+const LOGOS = {"Chicco":"logos/chicco.svg","Graco":"logos/graco.svg","Recaro":"logos/recaro.svg","Thule":"logos/thule.svg"};
 // small line drawings per card type (our own SVG, no photos on product cards: owner found photos confusing)
 const ICON_PATHS = {
   t_full:'<path d="M6 10h4l4 16h20l5-13H13"/><path d="M15 13a10 10 0 0 1 20 0"/><path d="M16 26l-4 8M32 26l4 8"/><circle cx="12" cy="37" r="3"/><circle cx="36" cy="37" r="3"/>',
@@ -530,7 +533,7 @@ function card(i, idx){
   const price = i.p!=null ? `<div class="price"><span class="now">${shekel(i.p)}</span>${i.pr? `<s><span class="sr-only">מחיר רגיל </span>${shekel(i.pr)}</s>`:""}${i.pn? `<span class="pn">${esc(i.pn)}</span>`:""}</div>` : `<div class="price none">המחיר לא מופיע באתר המוכר</div>`;
   return `<article class="item">
     <div class="body">
-      <div class="head">${icon(ik)}<div class="ht"><span class="brand">${esc(i.b)}</span><h3>${esc(i.n)}</h3>${i.d? `<p class="sub">${esc(i.d)}</p>`:""}</div></div>
+      <div class="head">${icon(ik)}<div class="ht"><span class="brand">${LOGOS[i.b]? `<img class="logo-img" src="${LOGOS[i.b]}" alt="${esc(i.b)}" loading="lazy">` : esc(i.b)}</span><h3>${esc(i.n)}</h3>${i.d? `<p class="sub">${esc(i.d)}</p>`:""}</div></div>
       ${badges? `<div class="badges">${badges}</div>`:""}
       ${price}
       <ul class="kf">${facts(i)}</ul>
