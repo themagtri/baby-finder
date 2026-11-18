@@ -12,6 +12,7 @@ python -I scripts/fetch_woo.py www.besafe-israel.co.il besafe
 python -I scripts/fetch_woo.py www.segalbaby.co.il segal
 python -I scripts/fetch_woo.py babyjogger.co.il babyjogger
 python -I scripts/fetch_joie.py
+python -I scripts/parse_manual.py          # PDFs that the owner saved, from the Desktop folder
 python -I scripts/build_catalog.py
 python -I scripts/site_data.py
 ```
@@ -28,8 +29,8 @@ python -I scripts/site_data.py
 | סגל בייבי (segalbaby.co.il) | נאסף: 5 עגלות YOYO |
 | Baby Jogger ישראל (babyjogger.co.il) | נאסף: 10 עגלות, 2 מושבים (רובם אזלו מהמלאי באתר) |
 | Joie ישראל (joiebaby.co.il) | נאסף: 22 עגלות, 31 מושבים (נתונים מובנים מהדף) |
-| Chicco ישראל (chiccoisrael.co.il) | **חסום** (Cloudflare 403). לא נאסף |
-| Cybex (cybexonline.co.il) | **חסום** (429 בבקשה הראשונה). לא נאסף |
+| Chicco ישראל (chiccoisrael.co.il) | חסום לאיסוף אוטומטי. **נאסף ידנית** מ-PDF של הבעלים: 15 מושבים, 15 עגלות (מחירים הוקלדו ביד ל-`data/manual_prices.csv`) |
+| Cybex (cybexonline.co.il) | חסום לאיסוף אוטומטי. **נאסף ידנית** מ-PDF של הבעלים: 37 עגלות, 11 מושבים (מחיר מועדון) |
 | שילב (shilav.co.il) | **חסום** (429 בבקשה הראשונה). לא נאסף. כאן נמכרים Maxi-Cosi ו-UPPAbaby |
 | Silver Cross, בייבי סטאר | **חסום** (429). לא נאסף |
 | UPPAbaby (uppababy.com/il) | אתר מותג בלי מחירים. מפנה לשילב |
@@ -55,3 +56,16 @@ python -I scripts/site_data.py
   - אריחי בחירה עם תמונות רקע מ-Unsplash, ותמונה להמחשה בראש כל כרטיס, מסומנת "תמונה להמחשה".
   - פס תחתון קבוע עם ספירה חיה של התוצאות.
   - תגית "חוסכים ₪X" שמחושבת מהמחיר לפני ואחרי המבצע באתר המוכר, ומיון לפי הנחה.
+
+### 2026-11-18 (המשך)
+- גופן: חזרה ל-Heebo בכל האתר, לבקשת הבעלים.
+- מקור ידני: דפי מוכרים שהבעלים שמר כ-PDF בתיקייה בשולחן העבודה.
+  - `scripts/parse_manual.py` קורא שם, קישור ומחיר מכל כרטיס.
+  - `scripts/manual_source.py` מאחד צבעים של אותו דגם באותו מחיר לכרטיס אחד.
+- מחיר: מחיר חבר מועדון כשהמוכר מציין אותו, אחרת מחיר מבצע, אחרת המחיר הרגיל.
+  - בכרטיס מופיעה תווית "מחיר חבר מועדון", והמחיר הרגיל מוצג מחוק.
+- מוצרים שלא היה ברור איך לסווג חופשו ברשת באנגלית, רק כדי לבחור סוג.
+  - המפרט בכרטיס עדיין רק מדף המוכר.
+  - בסינון לפי גיל, כשהמוכר לא כתב גיל, הסינון הולך לפי סוג המושב.
+- 152 מוצרים מ-6 מוכרים.
+- `scripts/serve.py`: שרת לתצוגה מקומית בלבד. שרת ברירת המחדל של Python ניתק קבצים מעל 64KB.
