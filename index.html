@@ -168,7 +168,7 @@ section.screen.on{display:block;animation:fade .35s ease}
 .cmp-row:hover .cs{text-decoration:underline}
 .clubs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.8rem}
 .clubs .lbl2{color:var(--muted)}
-.club{background:var(--sky);color:var(--navy);border-radius:999px;padding:2px 10px;font-weight:600}
+.club{background:var(--paper);color:var(--ink);border:1px dashed var(--line-strong);border-radius:8px;padding:1px 9px;font-weight:600;font-size:.78rem}
 .badge{font-size:.68rem;font-weight:700;letter-spacing:.08em;border-radius:10px;padding:4px 10px;background:var(--paper)}
 .badge.save{background:var(--sage)}
 .badge.oos{background:var(--blush)}
@@ -527,7 +527,6 @@ function card(i, idx){
   const badges = [
     i.sp ? '<span class="badge sp">ממומן</span>' : "",
     i.imp==="official" ? '<span class="badge imp">יבואן רשמי, לפי המוכר</span>' : i.imp==="parallel" ? '<span class="badge imp">יבוא מקביל, לפי המוכר</span>' : "",
-    sv ? `<span class="badge save">חוסכים ${shekel(sv)}${i.pn==="מחיר חבר מועדון"?" במועדון":""}</span>` : "",
     i.st!==1 ? '<span class="badge oos">אזל במלאי באתר</span>' : ""
   ].join("");
   const price = i.p!=null ? `<div class="price"><span class="now">${shekel(i.p)}</span>${i.pr? `<s><span class="sr-only">מחיר רגיל </span>${shekel(i.pr)}</s>`:""}${i.pn? `<span class="pn">${esc(i.pn)}</span>`:""}</div>` : `<div class="price none">המחיר לא מופיע באתר המוכר</div>`;
@@ -539,7 +538,7 @@ function card(i, idx){
       <ul class="kf">${facts(i)}</ul>
       ${compare(i)}
       ${clubTags(i)}
-      <div class="seller"><span>נמכר ב: <b>${esc(i.sn)}</b></span><span class="chk">נבדק ${fmtDate(i.chk)}</span></div>
+      <div class="seller"><span>נמכר ב: <b>${esc(i.sn)}</b></span></div>
       <a class="btn go" href="${esc(i.u)}" target="_blank" rel="noopener nofollow" data-out="${esc(i.s)}">לדף המוצר אצל המוכר<span class="sr-only"> (נפתח בחלון חדש)</span><span aria-hidden="true">↗</span></a>
     </div>
   </article>`;
