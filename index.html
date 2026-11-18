@@ -94,6 +94,7 @@ section.screen.on{display:block;animation:fade .35s ease}
 .tiles.two{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
 .tile{position:relative;border:0;padding:0;border-radius:var(--r);overflow:hidden;cursor:pointer;min-height:220px;text-align:right;background:#cdbfb4 center/cover no-repeat;display:flex;align-items:flex-end;isolation:isolate;box-shadow:var(--shadow);transition:transform .25s ease}
 .tiles.two .tile{min-height:300px}
+.tiles.quad{grid-template-columns:repeat(2,minmax(0,1fr))}
 .tile::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(10,10,10,0) 25%,rgba(10,10,10,.72) 100%)}
 .tile:hover{transform:translateY(-3px)}
 .tile .txt{color:#fff;padding:18px 20px;width:100%}
@@ -267,7 +268,7 @@ body.still *{animation:none!important;transition:none!important}
     <div id="prefSeat">
       <p class="lead">המידע על כל מושב מועתק מדף המוצר של המוכר. איננו ממליצים על בטיחות ואיננו מדרגים מושבים.</p>
       <h2 class="q" id="qStage">בן או בת כמה הילד?</h2>
-      <div class="tiles" id="stageOpts" role="group" aria-labelledby="qStage"></div>
+      <div class="tiles quad" id="stageOpts" role="group" aria-labelledby="qStage"></div>
       <h2 class="q" id="qSeat">דרישות, לפי מה שהמוכר כותב</h2>
       <div class="opt-row" id="seatReq" role="group" aria-labelledby="qSeat"></div>
       <p class="note" id="seatReqNote"></p>
@@ -337,7 +338,9 @@ const PH = {
   hero:"1733380005522-b8d76ce49d13", stroller:"1760160639570-e682e4595f86", carseat:"1619719287848-883c8f26efbc",
   t_full:"1636384919179-d936e55c5cca", t_stroller:"1784751722840-471e603b467f", t_travel:"1773063082298-91b61b59bc99",
   t_twin:"1744424846144-d57267a19ee8", t_carseatstroller:"1611223355350-5be15e624fdf",
-  s_newborn:"1773243086679-20c427d28092", s_toddler:"1633111046443-13a0c30033ea", s_kid:"1761047321481-abbdcfb7ff00",
+  s_newborn:"1773243086679-20c427d28092", s_toddler:"1633111046443-13a0c30033ea",
+  // every age tile shows a child or toy in a car seat / belted (no unbelted children in a car-seat context)
+  s_kid4:"1785224928043-113fac5b7e51", s_kid7:"1790243637140-2aa6f40b909b",
   g_infant:"1619719287848-883c8f26efbc", g_convertible:"1633111046443-13a0c30033ea", g_toddler:"1633111046443-13a0c30033ea", g_booster:"1761047321481-abbdcfb7ff00",
   budget:"1510154221590-ff63e90a136f"
 };
@@ -371,13 +374,15 @@ const TYPES = [
 ];
 const GROUPS = {infant:"סלקל", convertible:"כסא מלידה (משולב)", toddler:"כסא לפעוט", booster:"בוסטר"};
 const STAGES = [
-  {k:"newborn", he:"עוד לא נולד / עד שנה", sub:"מושב שמתאים מגיל לידה", test:(i)=> i.a0===0 ? true : (i.a0==null ? byGroup(i,"newborn") : false)},
-  {k:"toddler", he:"שנה עד 4", sub:"נבדק לפי גיל שנתיים", test:(i)=> covers(i,24) ?? byGroup(i,"toddler")},
-  {k:"kid", he:"4 ומעלה", sub:"נבדק לפי גיל 5", test:(i)=> covers(i,60) ?? byGroup(i,"kid")}
+  // a seat matches an age range when the seller's stated age range covers the middle of it
+  {k:"newborn", he:"מלידה ועד גיל שנה", sub:"גם לתינוק שעוד לא נולד", test:(i)=> i.a0===0 ? true : (i.a0==null ? byGroup(i,"newborn") : false)},
+  {k:"toddler", he:"מגיל שנה ועד 4", sub:"", test:(i)=> covers(i,30) ?? byGroup(i,"toddler")},
+  {k:"kid4", he:"מגיל 4 ועד 7", sub:"", test:(i)=> covers(i,66) ?? byGroup(i,"kid4")},
+  {k:"kid7", he:"מגיל 7 ומעלה", sub:"", test:(i)=> covers(i,96) ?? byGroup(i,"kid7")}
 ];
 function covers(i,m){ if(i.a0==null||i.a1==null) return null; return i.a0<=m && i.a1>=m; }
 // when the seller states no age range, the stage follows the seat type (tagging only; the card still says "לא צוין")
-const GROUP_STAGES = {infant:["newborn"], convertible:["newborn","toddler"], toddler:["toddler"], booster:["kid"]};
+const GROUP_STAGES = {infant:["newborn"], convertible:["newborn","toddler"], toddler:["toddler","kid4"], booster:["kid4","kid7"]};
 function byGroup(i,stage){ const g=GROUP_STAGES[i.g]; return g ? g.includes(stage) : null; }
 const REQS = [
   {k:"r129", he:"תקן R129 / i-Size", test:i=> i.std==null ? null : i.std==="R129"},
@@ -458,7 +463,10 @@ function renderPrefs(){
       return tile(`data-type="${t.k}"`, PH["t_"+t.k], t.he, t.sub, c? nf.format(c)+" מוצרים" : "אין עדיין במאגר", S.types.has(t.k), !c);
     }).join("");
   } else {
-    $("#stageOpts").innerHTML = STAGES.map(s=>tile(`data-stage="${s.k}"`, PH["s_"+s.k], s.he, s.sub, "", S.stage===s.k)).join("");
+    $("#stageOpts").innerHTML = STAGES.map(s=>{
+      const n = poolNeed().filter(i=>s.test(i)===true).length;
+      return tile(`data-stage="${s.k}"`, PH["s_"+s.k], s.he, s.sub, nf.format(n)+" מושבים", S.stage===s.k);
+    }).join("");
     $("#seatReq").innerHTML = REQS.map(r=>`<button class="opt" type="button" data-req="${r.k}" aria-pressed="${S.reqs.has(r.k)}">${r.he}</button>`).join("");
     const {hiddenUnknown} = filtered({ignoreBudget:true});
     $("#seatReqNote").textContent = hiddenUnknown ? `${hiddenUnknown} מושבים לא מוצגים כי המוכר לא ציין את אחד הנתונים שבחרתם (גיל, תקן, ISOFIX או סיבוב).` : "";
