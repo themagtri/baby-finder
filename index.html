@@ -372,7 +372,7 @@ const TYPES = [
 const GROUPS = {infant:"סלקל", convertible:"כסא מלידה (משולב)", toddler:"כסא לפעוט", booster:"בוסטר"};
 const STAGES = [
   // a seat matches an age range when the seller's stated age range covers the middle of it
-  {k:"newborn", he:"מלידה ועד גיל שנה", sub:"גם לתינוק שעוד לא נולד", test:(i)=> i.a0===0 ? true : (i.a0==null ? byGroup(i,"newborn") : false)},
+  {k:"newborn", he:"מלידה ועד גיל שנה", sub:"", test:(i)=> i.a0===0 ? true : (i.a0==null ? byGroup(i,"newborn") : false)},
   {k:"toddler", he:"מגיל שנה ועד 4", sub:"", test:(i)=> covers(i,30) ?? byGroup(i,"toddler")},
   {k:"kid4", he:"מגיל 4 ועד 7", sub:"", test:(i)=> covers(i,66) ?? byGroup(i,"kid4")},
   {k:"kid7", he:"מגיל 7 ומעלה", sub:"", test:(i)=> covers(i,96) ?? byGroup(i,"kid7")}
