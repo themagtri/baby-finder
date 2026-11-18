@@ -37,7 +37,7 @@ def main():
     with open(ROOT / "data" / "clubs.csv", encoding="utf-8") as f:
         for r in csv.DictReader(f):
             if r.get("club") and r.get("source_url"):
-                clubs.setdefault(r["seller"], []).append({"n": r["club"], "src": r["source_url"], "chk": r.get("checked") or None})
+                clubs.setdefault(r["seller"], []).append({"n": r["club"], "k": r.get("kind") or "club", "src": r["source_url"], "chk": r.get("checked") or None})
     js += "window.CLUBS = " + json.dumps(clubs, ensure_ascii=False, separators=(",", ":")) + ";\n"
     (ROOT / "data.js").write_text(js, encoding="utf-8")
     print(f"data.js: {len(items)} items")

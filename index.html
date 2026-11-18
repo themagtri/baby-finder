@@ -307,7 +307,9 @@ body.still *{animation:none!important;transition:none!important}
 "use strict";
 const ITEMS = window.ITEMS || [];
 const CLUBS = window.CLUBS || {};   // seller -> [{n: club name, src: source url}]
-const CLUB_NAMES = [...new Set(Object.values(CLUBS).flat().map(c=>c.n))].sort((a,b)=>a.localeCompare(b,"he"));
+// only cards/clubs of sellers that have products on the site, so the filter never leads to an empty list
+const SELLERS = new Set(ITEMS.map(i=>i.s));
+const CLUB_NAMES = [...new Set(Object.entries(CLUBS).filter(([s])=>SELLERS.has(s)).flatMap(([,cs])=>cs.map(c=>c.n)))].sort((a,b)=>a.localeCompare(b,"he"));
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const nf = new Intl.NumberFormat("he-IL");
@@ -485,7 +487,9 @@ function facts(i){
 function clubTags(i){
   const cs = CLUBS[i.s]||[];
   if(!cs.length) return "";
-  return `<div class="clubs"><span class="lbl2">הטבה במועדון:</span>${cs.map(c=>`<span class="club">${esc(c.n)}</span>`).join("")}</div>`;
+  const v=cs.filter(c=>c.k==="voucher"), d=cs.filter(c=>c.k!=="voucher");
+  const row=(lbl,list)=> list.length ? `<span class="lbl2">${lbl}</span>${list.map(c=>`<span class="club">${esc(c.n)}</span>`).join("")}` : "";
+  return `<div class="clubs">${row("אפשר לשלם ב:",v)}${row("הטבה במועדון:",d)}</div>`;
 }
 function card(i, idx){
   const ik = i.c==="carseat" ? "g_"+i.g : "t_"+i.t;
@@ -519,7 +523,7 @@ function renderRefine(){
       STAGES.map(s=>`<button class="opt" type="button" data-stage="${s.k}" aria-pressed="${S.stage===s.k}">${s.he}</button>`).join("")+`</div></div>`;
     html += `<div><div class="lbl">דרישות</div><div class="opt-row small">`+REQS.map(r=>`<button class="opt" type="button" data-req="${r.k}" aria-pressed="${S.reqs.has(r.k)}">${r.he}</button>`).join("")+`</div></div>`;
   }
-  if(CLUB_NAMES.length) html += `<div><div class="lbl">מועדון צרכנות שלי</div><div class="opt-row small"><button class="opt" type="button" data-club="" aria-pressed="${!S.clubs.size}">לא משנה</button>`+
+  if(CLUB_NAMES.length) html += `<div><div class="lbl">תו / מועדון שיש לי</div><div class="opt-row small"><button class="opt" type="button" data-club="" aria-pressed="${!S.clubs.size}">לא משנה</button>`+
       CLUB_NAMES.map(n=>`<button class="opt" type="button" data-club="${esc(n)}" aria-pressed="${S.clubs.has(n)}">${esc(n)}</button>`).join("")+`</div></div>`;
   html += `<div><div class="lbl">מלאי</div><div class="opt-row small"><button class="opt" type="button" data-stock="1" aria-pressed="${S.stock}">רק במלאי</button><button class="opt" type="button" data-stock="0" aria-pressed="${!S.stock}">הכל</button></div></div>`;
   $("#refine").innerHTML = html;
