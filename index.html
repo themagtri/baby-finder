@@ -519,7 +519,7 @@ function clubTags(i){
   return `<div class="clubs">${row("אפשר לשלם ב:",v)}${row("הטבה במועדון:",d)}</div>`;
 }
 function card(i, idx){
-  const ik = i.c==="carseat" ? "g_"+i.g : "t_"+i.t;
+  const ik = i.c==="carseat" ? "g_"+(i.g||"toddler") : "t_"+(i.t||"stroller");
   const sv = saving(i);
   const badges = [
     i.sp ? '<span class="badge sp">ממומן</span>' : "",

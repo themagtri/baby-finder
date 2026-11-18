@@ -160,7 +160,7 @@ BRANDS_HE = {"סייבקס": "Cybex", "צ'יקו": "Chicco", "ציקו": "Chicco
              "סילבר קרוס": "Silver Cross", "קינדרקראפט": "Kinderkraft", "גרקו": "Graco", "דונה": "Doona",
              "אנקס": "Anex", "ספורט ליין": "Sport Line", "טוויגי": "Twigy", "מונה": "Moona", "בייביארק": "Babyark",
              "ברייטקס": "Britax", "בוגבו": "Bugaboo", "דיליאנס": "Dilians"}
-ACCESSORY_ANY = r"^עריסה|^סל שכיבה|מתאם|תיק|שמשי|כיסוי|כילה|כילת|פגוש|מזרן|בסיס|מראה|ארגונית|מחזיק כוס|שק שינה|מגן|^שלדה? "
+ACCESSORY_ANY = r"שכחת ילדים|מכשיר ל|^עריסה|^סל שכיבה|מתאם|תיק|שמשי|כיסוי|כילה|כילת|פגוש|מזרן|בסיס|מראה|ארגונית|מחזיק כוס|שק שינה|מגן|^שלדה? "
 
 
 def brand_of(name):
@@ -282,8 +282,8 @@ def chain_file_rows(seller, prods, base, url_name=True):
                 else: kind = "full" if re.search(r"סל קל|עריסה|משולבת|אמבטיה|סל שכיבה|טריו", nm) else (kind if kind in ("full", "twin") else "stroller")
             elif fk[1]: kind = fk[1]
         if not cat: continue
-        if cat == "carseat" and not kind:
-            kind = next((t["seat_group"] for t in TAGS if re.search(t["pattern"], nm, re.I)), "")
+        tag = next((t["seat_group"] for t in TAGS if re.search(t["pattern"], nm, re.I)), "") if cat == "carseat" else ""
+        if tag and kind not in ("booster", "infant"): kind = tag
         if cat == "stroller" and kind != "twin" and re.search(r"עריסה|סל קל|סלקל|משולבת|סל שכיבה|אמבטיה|קומפלט|complete", nm, re.I): kind = "full"
         rot = 1 if cat == "carseat" and "מסתובב" in srcs else ""
         key = (brand, no_color(nm), cat, kind, p.get("regular"), p.get("club"), p.get("sale"), rot, p.get("import", ""))

@@ -217,34 +217,67 @@ def from_superpharm():
 
 
 def family(r):
-    """Same-model key across sellers (for the price comparison on each card). Only models we can match safely;
-    the type must also match (a stroller sold with a bassinet is not compared with one sold without)."""
-    from manual_source import CYBEX
-    name = r["model"]
-    fam = None
-    if r["brand"] == "Cybex":
+    """Same-model key across sellers (for the price comparison on each card). Canonical model names come from
+    scripts/models.py (Hebrew/English aliases) or manual_source.CYBEX; same edition, same bundle and same type
+    are required (a stroller sold with a bassinet / car seat / electric frame is a different offer)."""
+    from manual_source import CYBEX, EDITIONS
+    from models import canonical
+    name, brand = r["model"], r["brand"]
+    if brand == "Cybex":
         f = next((f for f in CYBEX if re.search(f[0], name, re.I)), None)
         fam = f[1] if f else None
-    elif r["brand"] == "Chicco":
-        from manual_source import CHICCO
-        c = next((c for c in CHICCO if c[0].lower() in name.lower()), None)
-        fam = c[1] if c else None
-    elif r["brand"] == "Joie":
-        latin = re.sub(r"(?i)joie|™|®", " ", " ".join(re.findall(r"[A-Za-z0-9™\- ]+", name)))
-        fam = "Joie " + "-".join(latin.lower().split()) if latin.strip() else None
-    elif r["brand"] == "BeSafe" and re.search(r"turn b", name, re.I):
-        fam = "BeSafe iZi Turn B"
-    elif r["brand"] == "Stokke" and re.search(r"yoyo\s*(3|³)|יויו 3", name, re.I):
-        fam = "Stokke YOYO³"
+    else:
+        c = canonical(brand, name)
+        fam = f"{brand} {c}" if c else None
     if not fam:
         return ""
-    from manual_source import EDITIONS
     ed = next((lbl for k, lbl in EDITIONS if re.search(k, name, re.I)), "")
-    # a stroller sold together with an infant car seat is a different offer
     bundle = "+carseat" if r["cat"] == "stroller" and re.search(r"סל קל|סלקל|קלאוד|cloud", name, re.I) else ""
     if re.search(r"חשמלי|e-priam|e", name, re.I): bundle += "+electric"
     if re.search(r"bonpoint|בונפואה", name, re.I): ed = "Bonpoint"
     return f"{fam}|{ed}|{bundle}|{r['cat']}|{r['type'] or r['seat_group']}"
+
+
+GENERIC = set("""עגלת עגלה עגלות תינוק טיולון כיסא כסא כ בטיחות סלקל סל קל בוסטר מושב לרכב משולבת דגם חדש החדשה
+הזמנה מוקדמת - / + של עם צבע i""".split())
+
+
+def merge_colours(rows):
+    """One card per model per seller per price (owner: no card per colour, say 'מגוון צבעים').
+    Key = seller + brand + category + type + both prices + model (canonical family if known, else the first two
+    distinctive words of the name). Stock = in stock if any colour is."""
+    def core(r):
+        if r["family"]:
+            return r["family"]
+        drop = GENERIC | {w.lower() for w in r["brand"].split()} | set(r["brand"].lower().split())
+        toks = [t for t in re.split(r"[\s/–\-]+", r["model"].lower().replace("™", "")) if t and t not in drop]
+        toks = [t for t in toks if t not in {"צ'יקו", "סייבקס", "בוגבו", "ג'ואי", "גוי", "נונה", "ברייטקס", "טוויגי"}]
+        return " ".join(toks[:2])
+    def ncol(r):
+        m = re.search(r"(\d+) צבעים", r["subtitle"])
+        return int(m.group(1)) if m else 1
+    groups = {}
+    for r in rows:
+        key = (r["seller"], r["brand"], r["cat"], r["type"] or r["seat_group"], r["price"], r["price_reg"], core(r))
+        groups.setdefault(key, []).append(r)
+    out = []
+    for g in groups.values():
+        best = next((r for r in g if r["in_stock"] in (1, "1")), g[0])
+        best = dict(best)
+        n = sum(ncol(r) for r in g)
+        sub = re.sub(r"\s*·\s*(\d+ צבעים|מגוון צבעים \(\d+\))", "", best["subtitle"]).strip(" ·")
+        if n > 1:
+            sub = (sub + " · " if sub else "") + f"מגוון צבעים ({n})"
+            best["model"] = shortest_name(g)
+        best["subtitle"] = sub
+        best["in_stock"] = int(any(r["in_stock"] in (1, "1") for r in g))
+        out.append(best)
+    return out
+
+
+def shortest_name(g):
+    """For a merged card show the plainest name (fewest words = usually without a colour)."""
+    return min((r["model"] for r in g), key=lambda m: (len(m.split()), len(m)))
 
 
 def main():
@@ -253,6 +286,7 @@ def main():
         from_woo("babyjogger", "Baby Jogger", ovs) + from_joie() + from_manual(base) + from_superpharm()
     for r in rows:
         r["family"] = family(r)
+    rows = merge_colours(rows)
     rows.sort(key=lambda r: (r["cat"], r["seller"], r["model"]))
     out = ROOT / "data" / "catalog.csv"
     with open(out, "w", encoding="utf-8", newline="") as f:
