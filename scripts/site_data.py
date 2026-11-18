@@ -41,7 +41,7 @@ def main():
         for o in group:
             best = {}
             for x in group:
-                if x["s"] == o["s"] or x["p"] is None: continue
+                if x["s"] == o["s"] or x["p"] is None or x["st"] != 1: continue  # in-stock offers only
                 if x["s"] not in best or x["p"] < best[x["s"]]["p"]: best[x["s"]] = x
             o["o"] = [{"sn": x["sn"], "p": x["p"], "u": x["u"], "pn": x["pn"], "st": x["st"]}
                       for x in sorted(best.values(), key=lambda x: x["p"])]
