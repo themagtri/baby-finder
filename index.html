@@ -171,6 +171,20 @@ section.screen.on{display:block;animation:fade .35s ease}
 .cmp-row small{color:var(--muted)}
 .cmp-row .oo{color:#8a5a00}
 .cmp-row:hover .cs{text-decoration:underline}
+.kf .k{display:flex;align-items:center;gap:6px}
+.info-btn{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--navy);background:var(--paper);color:var(--navy);
+  font:italic 700 .72rem/1 Georgia,serif;cursor:pointer;display:inline-grid;place-items:center;padding:0;flex:none}
+.info-btn:hover{background:var(--navy);color:#fff}
+#infoDlg{border:0;border-radius:20px;padding:22px 20px 18px;width:min(440px,calc(100vw - 32px));max-height:85vh;overflow:auto;
+  background:var(--paper);color:var(--ink);box-shadow:0 20px 60px rgba(10,10,10,.3)}
+#infoDlg::backdrop{background:rgba(10,10,10,.45)}
+#infoDlg h2{margin:0 0 10px;font-size:1.15rem;padding-inline-end:36px}
+#infoDlg p{margin:0 0 10px;font-size:.94rem;line-height:1.6}
+.dlg-note{color:var(--muted);font-size:.82rem!important}
+.dlg-x{position:absolute;top:12px;inset-inline-end:12px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line-strong);
+  background:transparent;font-size:1.3rem;line-height:1;cursor:pointer}
+.dlg-video{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000;margin:6px 0 10px}
+.dlg-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .clubs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.8rem}
 .clubs .lbl2{color:var(--muted)}
 .club{background:var(--paper);color:var(--ink);border:1px dashed var(--line-strong);border-radius:8px;padding:1px 9px;font-weight:600;font-size:.78rem}
@@ -311,6 +325,12 @@ body.still *{animation:none!important;transition:none!important}
     <nav aria-label="מסמכים"><a href="privacy.html">מדיניות פרטיות</a><a href="terms.html">תנאי שימוש</a><a href="accessibility.html">הצהרת נגישות</a></nav>
   </footer>
 </div>
+
+<dialog id="infoDlg" aria-labelledby="infoTitle">
+  <button class="dlg-x" type="button" id="infoClose" aria-label="סגירה">×</button>
+  <h2 id="infoTitle"></h2>
+  <div id="infoBody"></div>
+</dialog>
 
 <div class="cta-bar" id="ctaBar" hidden>
   <div class="in">
@@ -523,7 +543,7 @@ function facts(i){
     if(i.f) f.push(["קיפול", V(FOLD_HE[i.f]||esc(i.f))]);
   }
   if(f.length%2) f[f.length-1].push("wide");
-  return f.map(([k,v,w])=>`<li${w?' class="wide"':""}><span class="k">${k}</span>${v}</li>`).join("");
+  return f.map(([k,v,w])=>`<li${w?' class="wide"':""}><span class="k">${k}${INFO_KEY[k]? `<button class="info-btn" type="button" data-info="${INFO_KEY[k]}" aria-label="מה זה ${k}?">i</button>`:""}</span>${v}</li>`).join("");
 }
 // same model at other sellers (data.js "o": cheapest card of that model at each other seller)
 function compare(i){
@@ -540,6 +560,41 @@ function compare(i){
     ? `<span class="cmp-note">אותו מחיר גם אצל ${esc(same[0].sn)}</span>`
     : `<span class="cmp-note good">המחיר כאן הוא הנמוך שמצאנו לדגם הזה</span>`;
   return `<div class="cmp"><div class="cmp-h">אותו דגם אצל מוכרים נוספים ${note}</div>${rows}</div>`;
+}
+// "i" explanations on the card (general facts, not a safety recommendation)
+const INFO_KEY = {"תקן":"std", "ISOFIX":"iso"};
+const INFO = {
+  std: {t:"מה המשמעות של התקן?", h:`
+    <p><b>R129 (i-Size)</b>: התקן האירופי העדכני (UN R129). המושב מותאם לפי <b>גובה</b> הילד, נבדק גם בתאונת <b>צד</b>,
+    ומחייב נסיעה עם הגב לכיוון הנסיעה עד גיל 15 חודשים לפחות. i-Size הוא חלק מהתקן הזה.</p>
+    <p><b>R44/04</b>: התקן האירופי הקודם. הסיווג לפי <b>משקל</b> הילד (קבוצות 0+ עד 3), ונבדק בתאונה חזיתית בלבד.</p>
+    <p><b>FMVSS 213</b>: התקן הפדרלי האמריקאי למושבי בטיחות לילדים.</p>
+    <p class="dlg-note">בכרטיס מופיע התקן כפי שהמוכר כתב בדף המוצר. איננו ממליצים על מושב מסוים. לפני קנייה ובזמן ההתקנה פעלו לפי הוראות היצרן.</p>`},
+  iso: {t:"מה זה ISOFIX?", h:`
+    <p><b>ISOFIX (איזופיקס)</b> היא שיטת חיבור אחידה: שתי זרועות במושב הבטיחות ננעלות על שני עוגנים קבועים ברכב,
+    בין כרית המושב לגב. כך המושב מותקן בלי חגורת הרכב, ובמושבים רבים יש חיווי שמראה שהנעילה הושלמה.
+    לרוב יש גם רצועה עליונה (Top Tether) או רגל תמיכה.</p>
+    <p><b>כלול</b>: המושב מתחבר ב-ISOFIX. <b>בסיס נפרד</b>: את בסיס ה-ISOFIX קונים בנפרד. <b>ללא</b>: התקנה בחגורת הרכב.</p>
+    <p>לא בכל רכב יש עוגני ISOFIX בכל מושב. כדאי לבדוק בספר הרכב.</p>
+    <div class="dlg-video"><iframe data-src="https://www.youtube-nocookie.com/embed/asW6ecx-SXQ" title="סרטון: חיבור איזופיקס לרכב (ערוץ תינוק ישראלי)" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+    <p class="dlg-note"><a href="https://www.youtube.com/watch?v=asW6ecx-SXQ" target="_blank" rel="noopener">צפייה ביוטיוב ↗<span class="sr-only"> (נפתח בחלון חדש)</span></a>
+      · סרטון של ערוץ "תינוק ישראלי". ההתקנה לפי הוראות היצרן של המושב ושל הרכב.</p>`}
+};
+let infoOpener = null;
+function openInfo(k, opener){
+  const d = $("#infoDlg"), info = INFO[k]; if(!info) return;
+  infoOpener = opener;
+  $("#infoTitle").textContent = info.t;
+  $("#infoBody").innerHTML = info.h;
+  $("#infoBody").querySelectorAll("iframe[data-src]").forEach(f=>{ f.src = f.dataset.src; });  // load the video only when opened
+  if(d.showModal) d.showModal(); else d.setAttribute("open","");
+  $("#infoClose").focus();
+}
+function closeInfo(){
+  const d = $("#infoDlg");
+  $("#infoBody").innerHTML = "";              // stops the video
+  if(d.open) d.close();
+  if(infoOpener) infoOpener.focus();
 }
 function clubTags(i){
   const cs = CLUBS[i.s]||[];
@@ -637,6 +692,7 @@ function renderBar(){
 function reset(){ S.clubs.clear(); S.need=null; S.types.clear(); S.stage=null; S.reqs.clear(); S.max=null; S.aio=false; S.noprice=true; S.sort="low"; }
 document.addEventListener("click", e=>{
   const b=e.target.closest("button"); if(!b || b.closest("#a11yPanel")) return;
+  if(b.dataset.info){ openInfo(b.dataset.info, b); return; }
   if(b.dataset.need){ if(S.need!==b.dataset.need){ reset(); S.need=b.dataset.need; } renderHome(); go(2); return; }
   if(b.dataset.go){ go(+b.dataset.go); return; }
   if(b.classList.contains("restart")){ reset(); renderHome(); go(1); return; }
@@ -647,6 +703,9 @@ document.addEventListener("click", e=>{
   if(b.dataset.aio!==undefined){ S.aio = b.dataset.aio==="1"; rerender(); return; }
 });
 function rerender(){ if(S.step===2) renderPrefs(); if(S.step===4) renderResults(); renderChips(); renderBar(); }
+$("#infoClose").addEventListener("click", closeInfo);
+$("#infoDlg").addEventListener("cancel", e=>{ e.preventDefault(); closeInfo(); });
+$("#infoDlg").addEventListener("click", e=>{ if(e.target.id==="infoDlg") closeInfo(); });   // click on the backdrop
 $("#nextBtn").addEventListener("click",()=>go(S.step+1));
 $("#backBtn").addEventListener("click",()=>go(S.step-1));
 $("#sortSel").addEventListener("change",e=>{ S.sort=e.target.value; renderResults(); });
