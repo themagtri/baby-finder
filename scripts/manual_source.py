@@ -15,21 +15,21 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 # family regex -> (display name, cat, type or seat_group, standard stated in the seller's product name)
 # Category sources (web, 2026-11-18): cybex-online.com product/overview pages, chiccousa.com, chicco.in.
 CYBEX = [
-    (r"Coya 2", "Cybex Coya 2", "stroller", "travel", ""),
-    (r"Coya", "Cybex Coya", "stroller", "travel", ""),
-    (r"Mios 4", "Cybex Mios 4", "stroller", "stroller", ""),
-    (r"Mios 3", "Cybex Mios 3", "stroller", "stroller", ""),
-    (r"Priam 5", "Cybex Priam 5", "stroller", "stroller", ""),
-    (r"Priam 4", "Cybex Priam 4", "stroller", "stroller", ""),
-    (r"Balios", "Cybex Balios S5", "stroller", "full", ""),
-    (r"Eezy S Twist", "Cybex Eezy S Twist+ 2", "stroller", "travel", ""),
-    (r"Beezy", "Cybex Beezy", "stroller", "travel", ""),
-    (r"Orfeo", "Cybex Orfeo", "stroller", "travel", ""),
-    (r"Agis", "Cybex Agis", "stroller", "travel", ""),
-    (r"Cloud T", "Cybex Cloud T", "carseat", "infant", ""),
-    (r"Sirona T", "Cybex Sirona T i-Size", "carseat", "convertible", "R129"),
-    (r"Anoris T2", "Cybex Anoris T2 i-Size Plus", "carseat", "toddler", "R129"),
-    (r"Solution T", "Cybex Solution T i-Fix", "carseat", "booster", ""),
+    (r"Coya 2|קויה 2", "Cybex Coya 2", "stroller", "travel", ""),
+    (r"Coya|קויה", "Cybex Coya", "stroller", "travel", ""),
+    (r"Mios 4|MIOS 4|מיוס 4", "Cybex Mios 4", "stroller", "stroller", ""),
+    (r"Mios 3|MIOS 3|מיוס 3", "Cybex Mios 3", "stroller", "stroller", ""),
+    (r"Priam 5|פריאם 5", "Cybex Priam 5", "stroller", "stroller", ""),
+    (r"Priam 4|פריאם 4", "Cybex Priam 4", "stroller", "stroller", ""),
+    (r"Balios|בליוס", "Cybex Balios S5", "stroller", "full", ""),
+    (r"Eezy S Twist|איזי אס טוויסט", "Cybex Eezy S Twist+ 2", "stroller", "travel", ""),
+    (r"Beezy|ביזי", "Cybex Beezy", "stroller", "travel", ""),
+    (r"Orfeo|אורפאו", "Cybex Orfeo", "stroller", "travel", ""),
+    (r"Agis|אגיס", "Cybex Agis", "stroller", "travel", ""),
+    (r"Cloud T|קלאוד T|קלאוד טי", "Cybex Cloud T", "carseat", "infant", ""),
+    (r"Sirona T|סירונה T|סירונה טי", "Cybex Sirona T i-Size", "carseat", "convertible", "R129"),
+    (r"Anoris T2|אנוריס", "Cybex Anoris T2 i-Size Plus", "carseat", "toddler", "R129"),
+    (r"Solution T|סולושן T|סולושן טי", "Cybex Solution T i-Fix", "carseat", "booster", ""),
 ]
 FRAMES = [("רוזגולד", "שלדת רוזגולד"), ("מט שחור", "שלדה שחור מט"), ("חום כרום", "שלדת כרום חום"),
           ("שחור כרום", "שלדת כרום שחור"), ("כסופה", "שלדה כסופה")]
@@ -156,7 +156,7 @@ BRANDS_HE = {"סייבקס": "Cybex", "צ'יקו": "Chicco", "ציקו": "Chicco
              "בוגבו": "Bugaboo", "נונה": "Nuna", "מקסי קוזי": "Maxi-Cosi", "סטוקי": "Stokke", "יויו": "YOYO",
              "בריטקס": "Britax", "פג פרגו": "Peg Perego", "אינגלזינה": "Inglesina", "ג'ולז": "Joolz",
              "סילבר קרוס": "Silver Cross", "קינדרקראפט": "Kinderkraft", "גרקו": "Graco", "דונה": "Doona"}
-ACCESSORY_ANY = r"מתאם|תיק|שמשי|כיסוי|כילה|כילת|פגוש|מזרן|בסיס לסלקל|בסיס איזופיקס|מראה|ארגונית|מחזיק כוס|שק שינה|מגן"
+ACCESSORY_ANY = r"^עריסה|^סל שכיבה|מתאם|תיק|שמשי|כיסוי|כילה|כילת|פגוש|מזרן|בסיס|מראה|ארגונית|מחזיק כוס|שק שינה|מגן|^שלדה? "
 
 
 def brand_of(name):
@@ -201,7 +201,77 @@ def chain_rows(seller, prods, base):
     return rows
 
 
-CHAINS = ("shilav", "babystar", "motzetzim", "agalease", "minena")
+CHAINS = ("babystar", "motzetzim", "agalease", "minena")
+
+# ---- Shilav: names from the product URL (logical word order), category from the saved category page ----
+FILE_KIND = [("בוסטרים", ("carseat", "booster")), ("סלקלים ומושבים מגיל לידה", ("carseat", "from_birth")),
+             ("כיסאות בטיחות", ("carseat", "")), ("טיולונים", ("stroller", "travel")),
+             ("תאומים", ("stroller", "twin")), ("עגלות תינוק מגיל לידה", ("stroller", "from_birth"))]
+COLORS = set("""שחור שחורה לבן לבנה אפור אפורה כחול כחולה ורוד ורודה ירוק ירוקה בז חום חומה אדום אדומה קאמל לאטה
+זית שמנת כסף כסוף זהב גולד חול סהרה נייבי אינדיגו תכלת סגול צהוב כתום מוקה פסטל עמוק כהה בהיר שוקולד קרם אבן
+black white grey gray beige brown blue green pink red navy sand taupe love
+מגיק פוג לאווה ספיה אופוויט אוף וויט שח בג סי של סקיי בלו מודפס סייבקס פחם טראפל מלאנז מינרלי ארנב פיל נמר מיקי מיני""".split())
+BRAND_WORDS = ["Sport Line", "Shilav"] + BRANDS
+
+
+def _tags():
+    """Seat type for models whose type the seller's page does not state; each row cites the web source used
+    (owner: look unclear products up in English, only to choose the category)."""
+    import csv
+    with open(ROOT / "data" / "manual_tags.csv", encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+
+TAGS = _tags()
+
+
+def shilav_name(url):
+    import urllib.parse
+    h = urllib.parse.unquote(url.split("/products/")[1]).split("?")[0]
+    h = re.sub(r"-\d+$", "", h)
+    return " ".join(h.replace("-", " ").split())
+
+
+def no_color(name):
+    return " ".join(t for t in name.split() if t.strip("'\"/").lower() not in COLORS and not re.fullmatch(r"\d{1,2}", t) or t in ("2", "3", "4", "5"))
+
+
+def shilav_rows(prods, base):
+    groups = {}
+    for p in prods:
+        nm = shilav_name(p["url"])
+        if re.search(ACCESSORY_ANY, nm): continue
+        brand = next((b for b in BRAND_WORDS if b.lower() in p["name"].lower()), "") or brand_of(nm)
+        srcs = " ".join(p.get("source_files") or [p["source_file"]])
+        fk = next((v for k, v in FILE_KIND if k in srcs), (None, None))  # FILE_KIND is ordered specific-first
+        cat, kind = kind_of(nm)
+        fam = next((f for f in CYBEX if re.search(f[0], nm, re.I)), None) if brand == "Cybex" else None
+        if fam: cat, kind = fam[2], fam[3]
+        if fk[0]:  # the seller's own category page decides the category
+            cat = fk[0]
+            if fk[1] == "from_birth":
+                if cat == "carseat": kind = "infant" if re.search(r"סלקל|סל קל", nm) else "convertible"
+                else: kind = "full" if re.search(r"סל קל|עריסה|משולבת|אמבטיה|סל שכיבה|טריו", nm) else (kind if kind in ("full", "twin") else "stroller")
+            elif fk[1]: kind = fk[1]
+        if not cat: continue
+        if cat == "carseat" and not kind:
+            kind = next((t["seat_group"] for t in TAGS if re.search(t["pattern"], nm, re.I)), "")
+        if re.search(r"עריסה|סל קל|סלקל", nm) and cat == "stroller": kind = "full"
+        key = (brand, no_color(nm), cat, kind, p.get("regular"), p.get("club"))
+        groups.setdefault(key, []).append((nm, p))
+    rows = []
+    for (brand, base_nm, cat, kind, reg, club), vs in groups.items():
+        instock = [p for _, p in vs if not p.get("oos")]
+        pick = (instock or [p for _, p in vs])[0]
+        price, preg, note = price_fields(pick)
+        title = base_nm if brand.lower() in base_nm.lower() else f"{brand} {base_nm}".strip()
+        sub = SUB.get(kind, "") + (f" · {len(vs)} צבעים" if len(vs) > 1 else "")
+        kw = dict(cat=cat, brand=brand, model=title, subtitle=sub, price=n(price), price_reg=n(preg), price_note=note,
+                  in_stock=int(bool(instock)), url=pick["url"], source_id=pick["source_file"])
+        if cat == "stroller": kw["type"] = kind
+        else: kw["seat_group"] = kind
+        rows.append(base("shilav", **kw))
+    return rows
 
 
 def from_manual(base_fn):
@@ -213,6 +283,7 @@ def from_manual(base_fn):
     prods = d["products"]
     rows = cybex_rows([x for x in prods if x["seller"] == "cybex"], b) + \
         chicco_rows([x for x in prods if x["seller"] == "chicco"], b)
+    rows += shilav_rows([x for x in prods if x["seller"] == "shilav"], b)
     for ch in CHAINS:
         rows += chain_rows(ch, [x for x in prods if x["seller"] == ch], b)
     return rows

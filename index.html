@@ -155,6 +155,17 @@ section.screen.on{display:block;animation:fade .35s ease}
 .item .ht{min-width:0;flex:1}
 .ico{flex:none;width:52px;height:52px;padding:6px;border-radius:14px;background:var(--blush);stroke:var(--navy);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .item .badges{display:flex;flex-wrap:wrap;gap:6px}
+.cmp{border:1px solid var(--line);border-radius:14px;padding:8px 10px;display:grid;gap:4px}
+.cmp-h{font-size:.75rem;font-weight:700;letter-spacing:.04em;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.cmp-note{font-weight:600;background:var(--blush);color:var(--ink);border-radius:999px;padding:1px 8px;letter-spacing:0}
+.cmp-note.good{background:var(--sage)}
+.cmp-row{display:flex;align-items:center;gap:8px;text-decoration:none;padding:7px 4px;border-top:1px solid var(--line);min-height:40px}
+.cmp-row:first-of-type{border-top:0}
+.cmp-row .cs{font-weight:600;flex:1}
+.cmp-row .cp{font-size:.9rem}
+.cmp-row small{color:var(--muted)}
+.cmp-row .oo{color:#8a5a00}
+.cmp-row:hover .cs{text-decoration:underline}
 .clubs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.8rem}
 .clubs .lbl2{color:var(--muted)}
 .club{background:var(--sky);color:var(--navy);border-radius:999px;padding:2px 10px;font-weight:600}
@@ -484,6 +495,22 @@ function facts(i){
   if(f.length%2) f[f.length-1].push("wide");
   return f.map(([k,v,w])=>`<li${w?' class="wide"':""}><span class="k">${k}</span>${v}</li>`).join("");
 }
+// same model at other sellers (data.js "o": cheapest card of that model at each other seller)
+function compare(i){
+  if(!i.o || !i.o.length) return "";
+  const rows = i.o.map(o=>`<a class="cmp-row" href="${esc(o.u)}" target="_blank" rel="noopener nofollow" data-out="cmp">
+      <span class="cs">${esc(o.sn)}</span>
+      <span class="cp">${o.p!=null? "החל מ-"+shekel(o.p) : "מחיר לא מופיע"}${o.pn? ` <small>(${esc(o.pn)})</small>`:""}${o.st!==1? ' <small class="oo">אזל</small>':""}</span>
+      <span aria-hidden="true">↗</span><span class="sr-only"> (נפתח בחלון חדש)</span></a>`).join("");
+  const cheaper = i.p!=null ? i.o.filter(o=>o.p!=null && o.p<i.p) : [];
+  const same = i.p!=null ? i.o.filter(o=>o.p===i.p) : [];
+  const note = i.p==null ? "" : cheaper.length
+    ? `<span class="cmp-note">נמצא מחיר נמוך יותר אצל ${esc(cheaper[0].sn)}</span>`
+    : same.length
+    ? `<span class="cmp-note">אותו מחיר גם אצל ${esc(same[0].sn)}</span>`
+    : `<span class="cmp-note good">המחיר כאן הוא הנמוך שמצאנו לדגם הזה</span>`;
+  return `<div class="cmp"><div class="cmp-h">אותו דגם אצל מוכרים נוספים ${note}</div>${rows}</div>`;
+}
 function clubTags(i){
   const cs = CLUBS[i.s]||[];
   if(!cs.length) return "";
@@ -507,6 +534,7 @@ function card(i, idx){
       ${badges? `<div class="badges">${badges}</div>`:""}
       ${price}
       <ul class="kf">${facts(i)}</ul>
+      ${compare(i)}
       ${clubTags(i)}
       <div class="seller"><span>נמכר ב: <b>${esc(i.sn)}</b></span><span class="chk">נבדק ${fmtDate(i.chk)}</span></div>
       <a class="btn go" href="${esc(i.u)}" target="_blank" rel="noopener nofollow" data-out="${esc(i.s)}">לדף המוצר אצל המוכר<span class="sr-only"> (נפתח בחלון חדש)</span><span aria-hidden="true">↗</span></a>

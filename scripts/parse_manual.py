@@ -43,8 +43,38 @@ def parse_block(text):
     return out
 
 
+def parse_shilav(doc, path):
+    """Shilav cards are one big link (name + prices). A card cut by a page break continues at the top of the next
+    page under the same URL, so join all segments of a URL first. Club price = the number right before 'מחיר מועדון'."""
+    parts = {}
+    for page in doc:
+        for l in page.get_links():
+            u = l.get("uri") or ""
+            if "shilav.co.il" in u and "/products/" in u:
+                t = page.get_textbox(l["from"]).strip()
+                if t and t not in parts.setdefault(u, []):
+                    parts[u].append(t)
+    out = []
+    for u, segs in parts.items():
+        text = "\n".join(segs)
+        head = text.split("₪", 1)[0]
+        name = " ".join(head.split())
+        if not name or "₪" not in text:
+            continue
+        it = {"seller": "shilav", "name": name, "url": u, "source_file": path.name}
+        m = re.search(r"₪\s*" + NUM, text)
+        if m: it["regular"] = money(m.group(1))
+        m = re.search(r"₪?\s*" + NUM + r"\s*מחיר מועדון", text)
+        if m and money(m.group(1)) < it.get("regular", 1e9): it["club"] = money(m.group(1))
+        if re.search(r"אזל|לא במלאי|חסר במלאי", text): it["oos"] = True
+        out.append(it)
+    return out
+
+
 def parse_pdf(path):
     doc = fitz.open(path)
+    if "shilav" in path.name.lower():
+        return parse_shilav(doc, path)
     items = []
     for page in doc:
         links = []
@@ -78,10 +108,13 @@ def main(folder):
         got = parse_pdf(f)
         print(f"{f.name[:55]:55} {len(got)} products", file=sys.stderr)
         all_items += got
-    by_url = {}
-    for it in all_items:  # same product saved in two PDFs: keep the one with more fields
+    by_url, files = {}, {}
+    for it in all_items:  # same product saved in two PDFs: keep the one with more fields, remember every file
         k = it["url"]
+        files.setdefault(k, set()).add(it["source_file"])
         if k not in by_url or len(it) > len(by_url[k]): by_url[k] = it
+    for k, it in by_url.items():
+        it["source_files"] = sorted(files[k])
     out = ROOT / "data" / "raw" / "manual.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     mtime = max(f.stat().st_mtime for f in folder.rglob("*.pdf"))

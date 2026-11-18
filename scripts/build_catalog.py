@@ -17,7 +17,7 @@ TODAY = datetime.date.today()
 
 FIELDS = ["cat", "type", "seat_group", "brand", "model", "subtitle", "seller", "seller_name", "price", "price_reg",
           "in_stock", "url", "standard", "isofix", "rotating", "age_from_m", "age_to_m", "height_min_cm",
-          "height_max_cm", "weight_max_kg", "fold", "import_status", "checked", "source_id", "price_note"]
+          "height_max_cm", "weight_max_kg", "fold", "import_status", "checked", "source_id", "price_note", "family"]
 
 SELLER_NAME = {"besafe": "BeSafe ישראל", "segal": "סגל בייבי", "babyjogger": "Baby Jogger ישראל", "joie": "Joie ישראל",
                "cybex": "Cybex ישראל", "chicco": "Chicco ישראל",
@@ -178,10 +178,36 @@ def from_joie():
     return rows
 
 
+def family(r):
+    """Same-model key across sellers (for the price comparison on each card). Only models we can match safely;
+    the type must also match (a stroller sold with a bassinet is not compared with one sold without)."""
+    from manual_source import CYBEX
+    name = r["model"]
+    fam = None
+    if r["brand"] == "Cybex":
+        f = next((f for f in CYBEX if re.search(f[0], name, re.I)), None)
+        fam = f[1] if f else None
+    elif r["brand"] == "BeSafe" and re.search(r"turn b", name, re.I):
+        fam = "BeSafe iZi Turn B"
+    elif r["brand"] == "Stokke" and re.search(r"yoyo\s*(3|³)|יויו 3", name, re.I):
+        fam = "Stokke YOYO³"
+    if not fam:
+        return ""
+    from manual_source import EDITIONS
+    ed = next((lbl for k, lbl in EDITIONS if re.search(k, name, re.I)), "")
+    # a stroller sold together with an infant car seat is a different offer
+    bundle = "+carseat" if r["cat"] == "stroller" and re.search(r"סל קל|סלקל|קלאוד|cloud", name, re.I) else ""
+    if re.search(r"חשמלי|e-priam|e", name, re.I): bundle += "+electric"
+    if re.search(r"bonpoint|בונפואה", name, re.I): ed = "Bonpoint"
+    return f"{fam}|{ed}|{bundle}|{r['cat']}|{r['type'] or r['seat_group']}"
+
+
 def main():
     ovs = overrides()
     rows = from_woo("besafe", "BeSafe", ovs) + from_woo("segal", "Stokke", ovs) + \
         from_woo("babyjogger", "Baby Jogger", ovs) + from_joie() + from_manual(base)
+    for r in rows:
+        r["family"] = family(r)
     rows.sort(key=lambda r: (r["cat"], r["seller"], r["model"]))
     out = ROOT / "data" / "catalog.csv"
     with open(out, "w", encoding="utf-8", newline="") as f:
