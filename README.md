@@ -3,8 +3,48 @@
 אתר חינמי בעברית שעוזר להורים למצוא עגלה או מושב בטיחות לפי הצורך, ומקשר לדף המוצר אצל המוכר.
 הכללים והערות הפרויקט: [CLAUDE.md](CLAUDE.md). מיפוי היבואנים: [importers.md](importers.md).
 
+## איך מעדכנים נתונים
+
+מריצים מתיקיית הריפו:
+
+```
+python -I scripts/fetch_woo.py www.besafe-israel.co.il besafe
+python -I scripts/fetch_woo.py www.segalbaby.co.il segal
+python -I scripts/fetch_woo.py babyjogger.co.il babyjogger
+python -I scripts/fetch_joie.py
+python -I scripts/build_catalog.py
+python -I scripts/site_data.py
+```
+
+- הקבצים הגולמיים נשמרים ב-`data/raw/`, שלא נכנס לגיט.
+- `data/catalog.csv` ו-`data.js` כן נכנסים לגיט.
+- נתוני מושבי בטיחות שאינם מגיעים כנתון מובנה נכתבים ב-`data/overrides.csv`, ולצד כל ערך מצוטט המשפט מדף המוצר שממנו הוא נלקח.
+
+## מצב המקורות (18.11.2026)
+
+| מקור | מצב |
+|---|---|
+| BeSafe ישראל (besafe-israel.co.il) | נאסף: 4 מושבים (WooCommerce Store API) |
+| סגל בייבי (segalbaby.co.il) | נאסף: 5 עגלות YOYO |
+| Baby Jogger ישראל (babyjogger.co.il) | נאסף: 10 עגלות, 2 מושבים (רובם אזלו מהמלאי באתר) |
+| Joie ישראל (joiebaby.co.il) | נאסף: 22 עגלות, 31 מושבים (נתונים מובנים מהדף) |
+| Chicco ישראל (chiccoisrael.co.il) | **חסום** (Cloudflare 403). לא נאסף |
+| Cybex (cybexonline.co.il) | **חסום** (429 בבקשה הראשונה). לא נאסף |
+| שילב (shilav.co.il) | **חסום** (429 בבקשה הראשונה). לא נאסף. כאן נמכרים Maxi-Cosi ו-UPPAbaby |
+| Silver Cross, בייבי סטאר | **חסום** (429). לא נאסף |
+| UPPAbaby (uppababy.com/il) | אתר מותג בלי מחירים. מפנה לשילב |
+| Joolz (joolz.co.il) | הדומיין לא עונה (DNS) |
+| Britax (britax.co.il) | מחזיר דף ריק (202, כנראה הגנת בוטים). לא נאסף |
+
+לפי הכללים, אתרים שחוסמים לא עוקפים. אפשרויות להמשך: פנייה ליבואן לקבלת פיד מוצרים, או הזנה ידנית מדף המוצר.
+
 ## יומן שינויים
 
 ### 2026-11-18
 - פתיחת הפרויקט: `git init`, `CLAUDE.md` עם כללי הבעלים, README זה.
 - `importers.md`: מיפוי 23 מותגים ליבואנים, רשתות ופערי מחירים (מחקר מאותו יום).
+- ריפו ציבורי: themagtri/baby-finder.
+- גרסה ראשונה של האתר: `index.html` עם זרימה של צורך ← העדפות ← תקציב ← תוצאות, כרטיס לכל מוכר, תפריט נגישות.
+- סקריפטים לאיסוף מנומס (`scripts/`): robots.txt, השהיה של 2 שניות בין בקשות, עצירה בחסימה.
+- 74 מוצרים מ-4 מוכרים: 37 עגלות ו-37 מושבים.
+- טיוטות של מדיניות פרטיות, תנאי שימוש והצהרת נגישות, לבדיקת עורך דין.

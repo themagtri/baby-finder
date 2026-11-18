@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>מאתר העגלות · עגלות ומושבי בטיחות בישראל</title>
+<meta name="description" content="חיפוש מודרך לעגלות תינוק ומושבי בטיחות לרכב שנמכרים בישראל. בוחרים מה צריך, מסננים לפי העדפות ותקציב, ועוברים לדף המוצר אצל המוכר.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="מאתר העגלות">
+<meta property="og:locale" content="he_IL">
+<meta property="og:title" content="מאתר העגלות · עגלות ומושבי בטיחות בישראל">
+<meta property="og:description" content="עגלות ומושבי בטיחות מהיבואנים והחנויות בישראל, בחיפוש מודרך אחד.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* same formula as bike-finder: near-black, graphite cards, white type, grey secondary, hairline dividers */
+:root{
+  --bg:#141414; --card:#1d1d1d; --card-2:#2b2b2b; --text:#ffffff; --muted:#b0b0b0; --line:rgba(255,255,255,.12);
+  --line-strong:rgba(255,255,255,.32); --btn:#ffffff; --btn-ink:#141414; --warn:#ffcf5c; --radius:6px; --zoom:1;
+}
+*{box-sizing:border-box}
+html{font-size:calc(16px * var(--zoom))}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font-family:"Heebo",system-ui,sans-serif;font-weight:400;line-height:1.55;min-height:100vh;
+  background-image:radial-gradient(90vw 60vh at 110vw -10vh, rgba(255,255,255,.16), transparent 60%),
+                   radial-gradient(70vw 50vh at -20vw 110vh, rgba(255,255,255,.08), transparent 60%);
+  background-attachment:fixed}
+button,input{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.skip{position:absolute;inset-inline-start:-9999px;top:8px;background:#fff;color:#141414;padding:8px 14px;border-radius:var(--radius);z-index:100}
+.skip:focus{inset-inline-start:8px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px 80px}
+header.top{display:flex;align-items:center;justify-content:space-between;height:64px;gap:12px}
+.logo{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15;text-align:right;font-weight:500;font-size:1.06rem;background:none;border:0;padding:0;cursor:pointer}
+.logo b{font-weight:600}
+.logo .tagline{font-size:.75rem;font-weight:400;color:var(--muted);margin-top:2px}
+.top-actions{display:flex;gap:8px;align-items:center}
+.pill{font-size:.875rem;background:transparent;border:1px solid var(--line-strong);border-radius:999px;padding:7px 16px;cursor:pointer}
+.pill:hover{border-color:#fff}
+.a11y-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line-strong);background:transparent;cursor:pointer;display:grid;place-items:center}
+.a11y-btn svg{width:22px;height:22px}
+.a11y-panel{position:absolute;inset-inline-end:16px;top:64px;z-index:60;background:var(--card-2);border-radius:10px;padding:16px 18px;width:min(320px,calc(100vw - 32px));box-shadow:0 10px 40px rgba(0,0,0,.6)}
+.a11y-panel h2{font-size:1rem;margin:0 0 10px;font-weight:500}
+.a11y-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.a11y-row:last-child{border-bottom:0}
+.a11y-row .grp{display:flex;gap:6px}
+.mini{font-size:.82rem;border:1px solid var(--line-strong);background:transparent;border-radius:999px;padding:4px 12px;cursor:pointer}
+.mini[aria-pressed="true"]{background:#fff;color:#141414;border-color:#fff}
+.tabs{display:flex;align-items:center;gap:18px;border-bottom:1px solid var(--line);margin-bottom:36px;overflow-x:auto;scrollbar-width:none}
+.tab{background:none;border:0;padding:14px 0;color:var(--muted);cursor:pointer;position:relative;white-space:nowrap;font-size:.94rem}
+.tab.on{color:var(--text)}
+.tab.on::after{content:"";position:absolute;inset:auto 0 -1px 0;height:2px;background:var(--text)}
+.tab:disabled{cursor:default;opacity:.5}
+.tsep{flex:none;width:4px;height:4px;border-radius:50%;background:var(--muted);opacity:.6}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:-16px 0 26px}
+.chip{font-size:.8rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 12px}
+.chip strong{color:var(--text);font-weight:500}
+h1{font-weight:400;font-size:clamp(1.7rem,4.2vw,2.6rem);letter-spacing:-.4px;margin:0 0 8px}
+h2.q{font-weight:500;font-size:1.1rem;margin:28px 0 12px}
+.lead{color:var(--muted);margin:0 0 28px;font-size:1rem;max-width:680px}
+section.screen{display:none}
+section.screen.on{display:block;animation:fade .3s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.big-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;max-width:760px}
+.big{display:flex;gap:16px;align-items:center;text-align:right;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px;cursor:pointer;min-height:120px}
+.big:hover{border-color:var(--line-strong)}
+.big[aria-pressed="true"]{border-color:#fff;background:var(--card-2)}
+.big svg{flex:none;width:56px;height:56px;stroke:#fff;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.big .t{font-size:1.25rem;font-weight:500;display:block}
+.big small{display:block;color:var(--muted);font-size:.875rem;margin-top:2px}
+.opt-row{display:flex;flex-wrap:wrap;gap:10px}
+.opt{border:1px solid var(--line-strong);background:transparent;border-radius:var(--radius);padding:12px 16px;cursor:pointer;text-align:right;min-width:150px}
+.opt small{display:block;color:var(--muted);font-size:.8rem}
+.opt[aria-pressed="true"]{background:#fff;color:#141414;border-color:#fff}
+.opt[aria-pressed="true"] small{color:#333}
+.opt:disabled{opacity:.45;cursor:not-allowed}
+.opt-row.small .opt{min-width:0;padding:7px 13px;font-size:.875rem}
+.note{color:var(--muted);font-size:.875rem;margin:10px 0 0;max-width:720px}
+.note.warn{color:var(--warn)}
+.btn{border:0;border-radius:var(--radius);padding:14px 28px;cursor:pointer;background:var(--btn);color:var(--btn-ink);font-weight:500;font-size:.94rem;text-decoration:none;display:inline-block}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line-strong)}
+.actions{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;margin-top:32px;max-width:760px}
+.range{max-width:560px}
+.range output{font-size:1.6rem;font-weight:300;display:block;margin-bottom:6px}
+.range input[type=range]{width:100%;accent-color:#fff}
+.range .ends{display:flex;justify-content:space-between;color:var(--muted);font-size:.8rem}
+.toggle{display:flex;align-items:center;gap:10px;margin-top:14px;cursor:pointer;font-size:.94rem}
+.toggle input{width:20px;height:20px;accent-color:#fff}
+/* results */
+.res-head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:8px}
+.res-head p{margin:0;color:var(--muted)}
+.disclaimer{background:var(--card);border-inline-start:3px solid var(--warn);padding:12px 16px;border-radius:var(--radius);font-size:.9rem;margin:16px 0 22px;max-width:860px}
+.refine{display:grid;gap:12px;margin:0 0 22px}
+.refine .lbl{color:var(--muted);font-size:.8rem;margin-bottom:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.item{background:var(--card);border-radius:10px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:8px;border:1px solid transparent}
+.item.oos{opacity:.85}
+.ihead{display:flex;justify-content:space-between;gap:8px;align-items:center;color:var(--muted);font-size:.85rem}
+.tag{font-size:.75rem;border:1px solid var(--line-strong);border-radius:999px;padding:1px 9px;color:var(--text)}
+.tag.sp{background:var(--warn);color:#141414;border-color:var(--warn);font-weight:600}
+.tag.oos{border-color:var(--warn);color:var(--warn)}
+.item h3{margin:0;font-weight:500;font-size:1.1rem;line-height:1.35}
+.item .sub{margin:0;color:var(--muted);font-size:.875rem}
+.price{font-size:1.4rem;font-weight:400}
+.price s{font-size:.9rem;color:var(--muted);margin-inline-start:8px}
+.price.none{font-size:.95rem;color:var(--muted)}
+.specs{list-style:none;margin:2px 0 0;padding:0;display:grid;gap:3px;font-size:.875rem}
+.specs li{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding:4px 0}
+.specs li span:first-child{color:var(--muted)}
+.specs .unk{color:var(--muted);font-style:italic}
+.seller{font-size:.875rem;margin-top:auto;padding-top:6px}
+.item .btn{text-align:center;padding:11px 16px}
+.item .chk{color:var(--muted);font-size:.75rem}
+.empty{background:var(--card);padding:24px;border-radius:10px;max-width:640px}
+footer.credits{color:var(--muted);font-size:.8rem;border-top:1px solid var(--line);padding-top:18px;margin-top:48px;display:grid;gap:6px}
+footer.credits nav{display:flex;gap:16px;flex-wrap:wrap}
+/* accessibility modes */
+body.contrast{--bg:#000;--card:#000;--card-2:#111;--muted:#e6e6e6;--line:rgba(255,255,255,.6);--line-strong:#fff;background-image:none}
+body.contrast .item,body.contrast .big{border-color:#fff}
+body.links a{text-decoration:underline;text-decoration-thickness:2px;background:rgba(255,255,255,.12)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+body.still *{animation:none!important;transition:none!important}
+@media (max-width:560px){.opt{min-width:calc(50% - 5px)}.big{min-height:96px;padding:16px}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">דלג לתוכן הראשי</a>
+<div class="wrap">
+  <header class="top">
+    <button class="logo restart" type="button" aria-label="מאתר העגלות - חזרה להתחלה"><span><b>מאתר</b> העגלות</span><span class="tagline">עגלות ומושבי בטיחות בישראל</span></button>
+    <div class="top-actions">
+      <button class="pill restart" type="button" id="topRestart" hidden>חיפוש חדש ↺</button>
+      <button class="a11y-btn" id="a11yBtn" type="button" aria-label="תפריט נגישות" aria-expanded="false" aria-controls="a11yPanel"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="12" cy="4" r="2"/><path d="M19 8.5c0 .5-.4.9-.9 1L14 10.2V14l2 6.2a1 1 0 0 1-1.9.6L12.3 15h-.6l-1.8 5.8a1 1 0 0 1-1.9-.6L10 14v-3.8l-4.1-.7a1 1 0 0 1 .3-2l5.8.9 5.8-.9c.6-.1 1.2.4 1.2 1z"/></svg></button>
+    </div>
+  </header>
+  <div class="a11y-panel" id="a11yPanel" role="dialog" aria-label="הגדרות נגישות" hidden>
+    <h2>נגישות</h2>
+    <div class="a11y-row"><span>גודל טקסט</span><div class="grp"><button class="mini" type="button" data-zoom="1" aria-pressed="true">רגיל</button><button class="mini" type="button" data-zoom="1.15" aria-pressed="false">גדול</button><button class="mini" type="button" data-zoom="1.3" aria-pressed="false">גדול מאוד</button></div></div>
+    <div class="a11y-row"><span>ניגודיות גבוהה</span><button class="mini" type="button" data-mode="contrast" aria-pressed="false">הפעל</button></div>
+    <div class="a11y-row"><span>הדגשת קישורים</span><button class="mini" type="button" data-mode="links" aria-pressed="false">הפעל</button></div>
+    <div class="a11y-row"><span>עצירת אנימציות</span><button class="mini" type="button" data-mode="still" aria-pressed="false">הפעל</button></div>
+    <div class="a11y-row"><a href="accessibility.html">הצהרת נגישות</a><button class="mini" type="button" id="a11yReset">איפוס</button></div>
+  </div>
+
+  <main id="main" tabindex="-1">
+  <nav class="tabs" aria-label="שלבי החיפוש">
+    <button class="tab on" type="button" data-go="1">מה מחפשים</button>
+    <span class="tsep" aria-hidden="true"></span>
+    <button class="tab" type="button" data-go="2" disabled>העדפות</button>
+    <span class="tsep" aria-hidden="true"></span>
+    <button class="tab" type="button" data-go="3" disabled>תקציב</button>
+    <span class="tsep" aria-hidden="true"></span>
+    <button class="tab" type="button" data-go="4" disabled>תוצאות</button>
+  </nav>
+  <div class="chips" id="chips" aria-label="הבחירות שלך"></div>
+
+  <section class="screen on" id="s1" aria-labelledby="h1a">
+    <h1 id="h1a">מה אתם מחפשים?</h1>
+    <p class="lead">בוחרים מה צריך, מסננים לפי העדפות ותקציב, ועוברים ישר לדף המוצר אצל המוכר. כל הנתונים מועתקים מאתרי המוכרים בישראל.</p>
+    <div class="big-row" id="needOpts"></div>
+  </section>
+
+  <section class="screen" id="s2" aria-labelledby="h2a">
+    <h1 id="h2a">העדפות</h1>
+    <div id="prefStroller">
+      <p class="lead">איזה סוג עגלה? אפשר לבחור יותר מאחד. בלי בחירה מוצגים כל הסוגים.</p>
+      <div class="opt-row" id="typeOpts"></div>
+    </div>
+    <div id="prefSeat">
+      <p class="lead">המידע על כל מושב מועתק מדף המוצר של המוכר. איננו ממליצים על בטיחות ואיננו מדרגים מושבים.</p>
+      <h2 class="q" id="qStage">בן או בת כמה הילד?</h2>
+      <div class="opt-row" id="stageOpts" role="group" aria-labelledby="qStage"></div>
+      <h2 class="q" id="qSeat">דרישות (לפי מה שהמוכר כותב)</h2>
+      <div class="opt-row" id="seatReq" role="group" aria-labelledby="qSeat"></div>
+      <p class="note" id="seatReqNote"></p>
+    </div>
+    <div class="actions"><button class="btn ghost" type="button" data-go="1">→ חזרה</button><button class="btn" type="button" id="to3">המשך ←</button></div>
+  </section>
+
+  <section class="screen" id="s3" aria-labelledby="h3a">
+    <h1 id="h3a">תקציב</h1>
+    <p class="lead">עד כמה מוכנים להוציא? המחיר הוא המחיר שמופיע באתר המוכר ביום הבדיקה.</p>
+    <div class="range">
+      <label for="maxPrice" id="maxLbl">מחיר מקסימלי</label>
+      <output id="maxOut" for="maxPrice" aria-live="polite"></output>
+      <input type="range" id="maxPrice" min="0" max="5000" step="50">
+      <div class="ends"><span id="minEnd"></span><span id="maxEnd"></span></div>
+      <label class="toggle"><input type="checkbox" id="stockOnly" checked> להציג רק מה שבמלאי באתר המוכר</label>
+      <label class="toggle"><input type="checkbox" id="noPrice" checked> להציג גם מוצרים בלי מחיר באתר</label>
+    </div>
+    <div class="actions"><button class="btn ghost" type="button" data-go="2">→ חזרה</button><button class="btn" type="button" id="to4">לתוצאות ←</button></div>
+  </section>
+
+  <section class="screen" id="s4" aria-labelledby="resTitle">
+    <div class="res-head">
+      <div><h1 id="resTitle">תוצאות</h1><p id="resCount" aria-live="polite"></p></div>
+      <div class="opt-row small" id="sortOpts" role="group" aria-label="מיון"></div>
+    </div>
+    <div class="disclaimer" id="seatDisc" hidden>המידע במושבי הבטיחות (תקן, גיל, גובה, ISOFIX, סיבוב) מועתק מדף המוצר של המוכר כפי שהוא. איננו ממליצים על בטיחות ואיננו מדרגים מושבים. "לא צוין" פירושו שהמוכר לא כתב את הנתון. לפני קנייה ובזמן ההתקנה פעלו לפי הוראות היצרן.</div>
+    <div class="refine" id="refine"></div>
+    <div class="grid" id="grid"></div>
+    <p class="note" id="hiddenNote"></p>
+  </section>
+  </main>
+
+  <footer class="credits">
+    <div>המחירים והמלאי נאספו מאתרי המוכרים ב-<span id="chkDate"></span> ועשויים להשתנות. המחיר והתנאים הקובעים הם אלה שבאתר המוכר.</div>
+    <div>כל דגם מוצג בכרטיס נפרד לכל מוכר. מיקום ממומן, אם יהיה, יסומן "ממומן". אין באתר תמונות של מוכרים או יצרנים. הסימנים המסחריים שייכים לבעליהם ומוצגים לזיהוי בלבד.</div>
+    <nav aria-label="מסמכים"><a href="privacy.html">מדיניות פרטיות</a><a href="terms.html">תנאי שימוש</a><a href="accessibility.html">הצהרת נגישות</a></nav>
+  </footer>
+</div>
+<script src="data.js"></script>
+<script>
+(function(){
+"use strict";
+const ITEMS = window.ITEMS || [];
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const nf = new Intl.NumberFormat("he-IL");
+const shekel = n => "₪" + nf.format(n);
+
+const NEEDS = [
+  {k:"stroller", he:"עגלה", sub:"מערכת מלאה, עגלה מלידה, טיולון, תאומים",
+   svg:'<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M10 14h6l6 22h26l6-16H20"/><path d="M30 20a14 14 0 0 1 22 0"/><circle cx="24" cy="48" r="5"/><circle cx="46" cy="48" r="5"/></svg>'},
+  {k:"carseat", he:"כסא בטיחות לרכב", sub:"סלקל, כסא מלידה, כסא לפעוט, בוסטר",
+   svg:'<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M22 8h14a4 4 0 0 1 4 4v18l10 6v14a4 4 0 0 1-4 4H20a4 4 0 0 1-4-4V12a4 4 0 0 1 4-4z"/><path d="M24 22h12M24 30v14"/></svg>'}
+];
+const TYPES = [
+  {k:"full", he:"מערכת מלאה", sub:"כוללת סל שכיבה או סלקל, לפי שם המוצר"},
+  {k:"stroller", he:"עגלה מלידה", sub:"שלדה ומושב"},
+  {k:"travel", he:"טיולון / עגלת נסיעות", sub:"קלה וקומפקטית"},
+  {k:"twin", he:"תאומים / אחים", sub:"שני מושבים"},
+  {k:"carseatstroller", he:"סלקל-עגלה", sub:"סלקל עם גלגלים מובנים"}
+];
+const GROUPS = {infant:"סלקל", convertible:"כסא מלידה (משולב)", toddler:"כסא לפעוט", booster:"בוסטר"};
+const STAGES = [
+  {k:"newborn", he:"עוד לא נולד / עד שנה", sub:"מושב שמתאים מגיל לידה", test:(i)=> i.a0===0 ? true : (i.a0==null ? null : false)},
+  {k:"toddler", he:"שנה עד 4", sub:"בדיקה לפי גיל שנתיים", test:(i)=> covers(i,24)},
+  {k:"kid", he:"4 ומעלה", sub:"בדיקה לפי גיל 5", test:(i)=> covers(i,60)}
+];
+function covers(i,m){ if(i.a0==null||i.a1==null) return null; return i.a0<=m && i.a1>=m; }
+const REQS = [
+  {k:"r129", he:"תקן R129 / i-Size", test:i=> i.std==null ? null : i.std==="R129"},
+  {k:"iso", he:"ISOFIX כלול", test:i=> i.iso==null ? null : i.iso==="included"},
+  {k:"rot", he:"מסתובב", test:i=> i.rot===1 ? true : null}
+];
+const SORTS = [["low","מחיר: מהזול"],["high","מחיר: מהיקר"],["name","שם"]];
+const ISO_HE = {included:"כלול", optional:"אופציונלי (בסיס נפרד)", without:"ללא"};
+const STD_HE = {"R129":"R129 (i-Size)"};
+const FOLD_HE = {book:"קיפול ספר", "3d":"קיפול תלת-ממדי", umbrella:"קיפול מטרייה"};
+
+const S = {step:1, need:null, types:new Set(), stage:null, reqs:new Set(), max:null, stock:true, noprice:true, sort:"low"};
+
+function poolNeed(){ return ITEMS.filter(i=>i.c===S.need); }
+// returns {list, hiddenUnknown}
+function filtered(opts){
+  opts = opts || {};
+  let hiddenUnknown = 0;
+  const out = poolNeed().filter(i=>{
+    if(S.need==="stroller" && S.types.size && !S.types.has(i.t)) return false;
+    if(S.need==="carseat"){
+      let unk=false;
+      if(S.stage){ const r=STAGES.find(s=>s.k===S.stage).test(i); if(r===false) return false; if(r===null) unk=true; }
+      for(const k of S.reqs){ const r=REQS.find(x=>x.k===k).test(i); if(r===false) return false; if(r===null) unk=true; }
+      if(unk){ hiddenUnknown++; return false; }
+    }
+    if(!opts.ignoreBudget){
+      if(S.stock && i.st!==1) return false;
+      if(i.p==null){ if(!S.noprice) return false; }
+      else if(S.max!=null && i.p>S.max) return false;
+    }
+    return true;
+  });
+  return {list:out, hiddenUnknown};
+}
+
+function fmtAge(m){
+  if(m===0) return "לידה";
+  if(m<24) return m+" חודשים";
+  const y=Math.round(m/12*10)/10;
+  return (Number.isInteger(y)? y : y.toFixed(1))+" שנים";
+}
+function fmtDate(d){ if(!d) return ""; const [y,m,dd]=d.split("-"); return `${dd}.${m}.${y}`; }
+
+/* ---------- screens ---------- */
+function go(n, quiet){
+  S.step=n;
+  document.querySelectorAll("section.screen").forEach(s=>s.classList.toggle("on", s.id==="s"+n));
+  document.querySelectorAll(".tab").forEach(t=>{
+    const k=+t.dataset.go; t.classList.toggle("on",k===n);
+    t.disabled = !S.need && k>1;
+    if(k===n) t.setAttribute("aria-current","step"); else t.removeAttribute("aria-current");
+  });
+  $("#topRestart").hidden = n===1 && !S.need;
+  if(n===2) renderPrefs();
+  if(n===3) renderBudget();
+  if(n===4) renderResults();
+  renderChips();
+  const h=document.querySelector("#s"+n+" h1"); if(h && !quiet){ h.setAttribute("tabindex","-1"); h.focus({preventScroll:true}); }
+  window.scrollTo({top:0});
+}
+
+function renderNeed(){
+  $("#needOpts").innerHTML = NEEDS.map(n=>{
+    const c=ITEMS.filter(i=>i.c===n.k).length;
+    return `<button class="big" type="button" data-need="${n.k}" aria-pressed="${S.need===n.k}">${n.svg}<span><span class="t">${n.he}</span><small>${n.sub}</small><small>${nf.format(c)} מוצרים</small></span></button>`;
+  }).join("");
+}
+
+function renderPrefs(){
+  $("#prefStroller").hidden = S.need!=="stroller";
+  $("#prefSeat").hidden = S.need!=="carseat";
+  if(S.need==="stroller"){
+    $("#typeOpts").innerHTML = TYPES.map(t=>{
+      const c=poolNeed().filter(i=>i.t===t.k).length;
+      return `<button class="opt" type="button" data-type="${t.k}" aria-pressed="${S.types.has(t.k)}" ${c?"":"disabled"}><span>${t.he}</span><small>${t.sub}</small><small>${c? nf.format(c)+" מוצרים" : "אין עדיין במאגר"}</small></button>`;
+    }).join("");
+  } else {
+    $("#stageOpts").innerHTML = `<button class="opt" type="button" data-stage="" aria-pressed="${!S.stage}"><span>לא משנה</span><small>כל הגילים</small></button>` +
+      STAGES.map(s=>`<button class="opt" type="button" data-stage="${s.k}" aria-pressed="${S.stage===s.k}"><span>${s.he}</span><small>${s.sub}</small></button>`).join("");
+    $("#seatReq").innerHTML = REQS.map(r=>`<button class="opt" type="button" data-req="${r.k}" aria-pressed="${S.reqs.has(r.k)}"><span>${r.he}</span></button>`).join("");
+    const {hiddenUnknown} = filtered({ignoreBudget:true});
+    $("#seatReqNote").textContent = hiddenUnknown ? `${hiddenUnknown} מושבים לא מוצגים כי המוכר לא ציין את אחד הנתונים שבחרתם (גיל, תקן, ISOFIX או סיבוב).` : "";
+  }
+}
+
+function priceBounds(){
+  const ps = filtered({ignoreBudget:true}).list.map(i=>i.p).filter(p=>p!=null);
+  if(!ps.length) return [0,0];
+  return [Math.floor(Math.min(...ps)/50)*50, Math.ceil(Math.max(...ps)/50)*50];
+}
+function renderBudget(){
+  const [lo,hi]=priceBounds(); const r=$("#maxPrice");
+  r.min=lo; r.max=hi; if(S.max==null || S.max>hi || S.max<lo) S.max=hi; r.value=S.max;
+  $("#minEnd").textContent=shekel(lo); $("#maxEnd").textContent=shekel(hi);
+  updateMaxOut();
+  $("#stockOnly").checked=S.stock; $("#noPrice").checked=S.noprice;
+}
+function updateMaxOut(){
+  const hi=+$("#maxPrice").max;
+  $("#maxOut").textContent = S.max>=hi ? "ללא הגבלה" : "עד "+shekel(S.max);
+  $("#maxPrice").setAttribute("aria-valuetext", $("#maxOut").textContent);
+}
+
+function specRows(i){
+  const rows=[], unk='<span class="unk">לא צוין</span>';
+  if(i.c==="carseat"){
+    rows.push(["סוג", GROUPS[i.g]||unk]);
+    rows.push(["תקן (לפי המוכר)", i.std? esc(STD_HE[i.std]||i.std) : unk]);
+    rows.push(["גיל", i.a0!=null ? (i.a1!=null ? `${fmtAge(i.a0)} עד ${fmtAge(i.a1)}` : `מ${fmtAge(i.a0)}`) : unk]);
+    if(i.h0!=null) rows.push(["גובה הילד", `${i.h0}–${i.h1} ס"מ`]);
+    if(i.w1!=null) rows.push(["משקל הילד עד", `${i.w1} ק"ג`]);
+    rows.push(["ISOFIX", i.iso? ISO_HE[i.iso] : unk]);
+    rows.push(["מסתובב", i.rot===1? "כן" : unk]);
+  } else {
+    const t=TYPES.find(t=>t.k===i.t); rows.push(["סוג", t? t.he : unk]);
+    if(i.a0!=null && i.a1!=null) rows.push(["גיל (לפי המוכר)", `${fmtAge(i.a0)} עד ${fmtAge(i.a1)}`]);
+    if(i.f) rows.push(["קיפול", FOLD_HE[i.f]||esc(i.f)]);
+  }
+  return rows.map(([a,b])=>`<li><span>${a}</span><span>${b}</span></li>`).join("");
+}
+function card(i){
+  const imp = i.imp==="official" ? '<span class="tag">יבואן רשמי (לפי המוכר)</span>' : i.imp==="parallel" ? '<span class="tag">יבוא מקביל (לפי המוכר)</span>' : "";
+  const price = i.p!=null ? `<div class="price">${shekel(i.p)}${i.pr? `<s aria-label="מחיר קודם ${shekel(i.pr)}">${shekel(i.pr)}</s>`:""}</div>` : `<div class="price none">המחיר לא מופיע באתר המוכר</div>`;
+  return `<article class="item${i.st!==1?" oos":""}">
+    <div class="ihead"><span>${esc(i.b)}</span><span>${i.sp?'<span class="tag sp">ממומן</span> ':""}${imp}${i.st!==1?'<span class="tag oos">אזל במלאי באתר</span>':""}</span></div>
+    <h3>${esc(i.n)}</h3>
+    ${i.d? `<p class="sub">${esc(i.d)}</p>`:""}
+    ${price}
+    <ul class="specs">${specRows(i)}</ul>
+    <div class="seller">נמכר ב: <b>${esc(i.sn)}</b></div>
+    <a class="btn" href="${esc(i.u)}" target="_blank" rel="noopener nofollow" data-out="${esc(i.s)}">לדף המוצר אצל המוכר ↗<span class="sr-only"> (נפתח בחלון חדש)</span></a>
+    <span class="chk">נבדק ${fmtDate(i.chk)}</span>
+  </article>`;
+}
+function renderRefine(){
+  let html="";
+  if(S.need==="stroller"){
+    html += `<div><div class="lbl">סוג</div><div class="opt-row small">`+
+      `<button class="opt" type="button" data-type="" aria-pressed="${!S.types.size}">הכל</button>`+
+      TYPES.filter(t=>poolNeed().some(i=>i.t===t.k)).map(t=>`<button class="opt" type="button" data-type="${t.k}" aria-pressed="${S.types.has(t.k)}">${t.he}</button>`).join("")+`</div></div>`;
+  } else {
+    html += `<div><div class="lbl">גיל</div><div class="opt-row small"><button class="opt" type="button" data-stage="" aria-pressed="${!S.stage}">הכל</button>`+
+      STAGES.map(s=>`<button class="opt" type="button" data-stage="${s.k}" aria-pressed="${S.stage===s.k}">${s.he}</button>`).join("")+`</div></div>`;
+    html += `<div><div class="lbl">דרישות</div><div class="opt-row small">`+REQS.map(r=>`<button class="opt" type="button" data-req="${r.k}" aria-pressed="${S.reqs.has(r.k)}">${r.he}</button>`).join("")+`</div></div>`;
+  }
+  html += `<div><div class="lbl">מלאי</div><div class="opt-row small"><button class="opt" type="button" data-stock="1" aria-pressed="${S.stock}">רק במלאי</button><button class="opt" type="button" data-stock="0" aria-pressed="${!S.stock}">הכל</button></div></div>`;
+  $("#refine").innerHTML = html;
+}
+function renderResults(){
+  const {list, hiddenUnknown} = filtered();
+  const sorted = list.slice().sort((a,b)=>{
+    if(S.sort==="name") return a.n.localeCompare(b.n,"he");
+    if(a.p==null && b.p==null) return 0; if(a.p==null) return 1; if(b.p==null) return -1;
+    return S.sort==="high" ? b.p-a.p : a.p-b.p;
+  });
+  $("#resTitle").textContent = S.need==="carseat" ? "מושבי בטיחות" : "עגלות";
+  $("#resCount").textContent = `${nf.format(sorted.length)} תוצאות`;
+  $("#sortOpts").innerHTML = SORTS.map(([k,he])=>`<button class="opt" type="button" data-sort="${k}" aria-pressed="${S.sort===k}">${he}</button>`).join("");
+  $("#seatDisc").hidden = S.need!=="carseat";
+  renderRefine();
+  $("#grid").innerHTML = sorted.length ? sorted.map(card).join("") :
+    `<div class="empty">אין תוצאות לבחירות האלה. נסו להרחיב את התקציב, לכלול מוצרים שאזלו מהמלאי או להסיר דרישה.</div>`;
+  $("#hiddenNote").textContent = hiddenUnknown ? `${hiddenUnknown} מושבים נוספים לא מוצגים כי המוכר לא ציין נתון שבחרתם.` : "";
+}
+function renderChips(){
+  const c=[];
+  if(S.need) c.push(`<span class="chip"><strong>${NEEDS.find(n=>n.k===S.need).he}</strong></span>`);
+  if(S.need==="stroller" && S.types.size) c.push(`<span class="chip">${[...S.types].map(k=>TYPES.find(t=>t.k===k).he).join(", ")}</span>`);
+  if(S.need==="carseat" && S.stage) c.push(`<span class="chip">${STAGES.find(s=>s.k===S.stage).he}</span>`);
+  if(S.need==="carseat") for(const k of S.reqs) c.push(`<span class="chip">${REQS.find(r=>r.k===k).he}</span>`);
+  if(S.step>=4 && S.max!=null && S.max<+$("#maxPrice").max) c.push(`<span class="chip">עד ${shekel(S.max)}</span>`);
+  $("#chips").innerHTML=c.join("");
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click", e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  if(b.dataset.need){ if(S.need!==b.dataset.need){ S.need=b.dataset.need; S.types.clear(); S.stage=null; S.reqs.clear(); S.max=null; } renderNeed(); go(2); return; }
+  if(b.dataset.go){ go(+b.dataset.go); return; }
+  if(b.classList.contains("restart")){ S.need=null; S.types.clear(); S.stage=null; S.reqs.clear(); S.max=null; S.stock=true; S.noprice=true; renderNeed(); go(1); return; }
+  if(b.dataset.type!==undefined){ const k=b.dataset.type; if(!k) S.types.clear(); else S.types.has(k)? S.types.delete(k) : S.types.add(k); rerender(); return; }
+  if(b.dataset.stage!==undefined){ S.stage=b.dataset.stage||null; rerender(); return; }
+  if(b.dataset.req){ const k=b.dataset.req; S.reqs.has(k)? S.reqs.delete(k) : S.reqs.add(k); rerender(); return; }
+  if(b.dataset.stock!==undefined){ S.stock=b.dataset.stock==="1"; rerender(); return; }
+  if(b.dataset.sort){ S.sort=b.dataset.sort; renderResults(); return; }
+});
+function rerender(){ if(S.step===2) renderPrefs(); if(S.step===4) renderResults(); renderChips(); }
+$("#to3").addEventListener("click",()=>go(3));
+$("#to4").addEventListener("click",()=>go(4));
+$("#maxPrice").addEventListener("input",e=>{ S.max=+e.target.value; updateMaxOut(); });
+$("#stockOnly").addEventListener("change",e=>{ S.stock=e.target.checked; renderBudget(); });
+$("#noPrice").addEventListener("change",e=>{ S.noprice=e.target.checked; });
+
+/* accessibility panel (settings kept in this browser only) */
+const A11Y_KEY="bf-a11y";
+function a11yLoad(){ try{ return JSON.parse(localStorage.getItem(A11Y_KEY))||{}; }catch(e){ return {}; } }
+function a11ySave(o){ try{ localStorage.setItem(A11Y_KEY, JSON.stringify(o)); }catch(e){} }
+function a11yApply(o){
+  document.documentElement.style.setProperty("--zoom", o.zoom||1);
+  ["contrast","links","still"].forEach(m=>document.body.classList.toggle(m, !!o[m]));
+  document.querySelectorAll("[data-zoom]").forEach(b=>b.setAttribute("aria-pressed", String((o.zoom||1)==+b.dataset.zoom)));
+  document.querySelectorAll("[data-mode]").forEach(b=>{ const on=!!o[b.dataset.mode]; b.setAttribute("aria-pressed",String(on)); b.textContent=on?"כבה":"הפעל"; });
+}
+let A=a11yLoad(); a11yApply(A);
+$("#a11yBtn").addEventListener("click",()=>{ const p=$("#a11yPanel"); p.hidden=!p.hidden; $("#a11yBtn").setAttribute("aria-expanded",String(!p.hidden)); if(!p.hidden) p.querySelector("button").focus(); });
+$("#a11yPanel").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return; e.stopPropagation();
+  if(b.dataset.zoom) A.zoom=+b.dataset.zoom;
+  if(b.dataset.mode) A[b.dataset.mode]=!A[b.dataset.mode];
+  if(b.id==="a11yReset") A={};
+  a11ySave(A); a11yApply(A);
+});
+document.addEventListener("keydown",e=>{ if(e.key==="Escape" && !$("#a11yPanel").hidden){ $("#a11yPanel").hidden=true; $("#a11yBtn").setAttribute("aria-expanded","false"); $("#a11yBtn").focus(); } });
+
+const dates=[...new Set(ITEMS.map(i=>i.chk).filter(Boolean))].sort();
+$("#chkDate").textContent = dates.length ? fmtDate(dates[dates.length-1]) : "";
+renderNeed(); go(1, true);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+"""Normalize data/raw/*.json (per seller) into data/catalog.csv — one row per product per seller.
+
+Rules (CLAUDE.md):
+- Nothing is invented. A field the seller's data/page does not state stays empty (= "unknown" on the site).
+- Car-seat specs come only from the seller's structured data or from data/overrides.csv, where each
+  value is backed by a quote copied from the seller's product page.
+- import_status stays empty unless the seller states official/parallel import (none do so far).
+Usage: python -I scripts/build_catalog.py      (run from repo root)
+"""
+import csv, html, json, pathlib, re, sys, datetime
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+RAW = ROOT / "data" / "raw"
+TODAY = datetime.date.today()
+
+FIELDS = ["cat", "type", "seat_group", "brand", "model", "subtitle", "seller", "seller_name", "price", "price_reg",
+          "in_stock", "url", "standard", "isofix", "rotating", "age_from_m", "age_to_m", "height_min_cm",
+          "height_max_cm", "weight_max_kg", "fold", "import_status", "checked", "source_id"]
+
+SELLER_NAME = {"besafe": "BeSafe ישראל", "segal": "סגל בייבי", "babyjogger": "Baby Jogger ישראל", "joie": "Joie ישראל"}
+
+
+def clean(s):
+    return re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", s or ""))).strip()
+
+
+def load(slug):
+    p = RAW / f"{slug}.json"
+    if not p.exists():
+        print(f"skip {slug}: no raw file", file=sys.stderr)
+        return None
+    return json.loads(p.read_text(encoding="utf-8"))
+
+
+def woo_price(p):
+    pr = p["prices"]
+    mu = pr.get("currency_minor_unit", 0)
+    def num(v):
+        if not v: return None
+        n = int(v) / 10 ** mu
+        return int(n) if n == int(n) else n
+    cur, reg = num(pr.get("price")), num(pr.get("regular_price"))
+    if not cur: return None, None
+    return cur, (reg if reg and reg != cur else None)
+
+
+def overrides():
+    out = {}
+    with open(ROOT / "data" / "overrides.csv", encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            out[(r["seller"], r["source_id"])] = r
+    return out
+
+
+def base(seller, fetched, **kw):
+    row = {k: "" for k in FIELDS}
+    row.update(seller=seller, seller_name=SELLER_NAME[seller], checked=fetched)
+    row.update({k: ("" if v is None else v) for k, v in kw.items()})
+    return row
+
+
+def stroller_type(name, cats):
+    c = " ".join(cats)
+    if "תאומים" in c or "תאומים" in name or "Double" in name or "twin" in name.lower():
+        return "twin"
+    if re.search(r"trio|travel system|ramble|ניובורן|סל שכיבה|אמבטיה", name, re.I):
+        return "full"
+    if "טיולון" in name or "טיולונים" == c or "אולטרה קומפקט" in c:
+        return "travel"
+    return "stroller"
+
+
+def apply_override(row, ov):
+    if not ov: return row
+    for k in ("seat_group", "age_from_m", "age_to_m", "height_min_cm", "height_max_cm", "weight_max_kg",
+              "standard", "isofix", "rotating"):
+        if ov.get(k):
+            row[k] = ov[k]
+    return row
+
+
+def from_woo(slug, brand, ovs):
+    d = load(slug)
+    if not d: return []
+    rows = []
+    for p in d["products"]:
+        name = clean(p["name"])
+        cats = [c["name"] for c in p["categories"]]
+        cur, reg = woo_price(p)
+        ov = ovs.get((slug, str(p["id"])))
+        common = dict(brand=brand, model=name, price=cur, price_reg=reg, in_stock=int(bool(p["is_in_stock"])),
+                      url=p["permalink"], source_id=p["id"])
+        is_seat_cat = any(k in c for c in cats for k in ("כיסאות בטיחות", "סלקלים", "בוסטרים", "בטיחות ברכב"))
+        if ov is not None:
+            rows.append(apply_override(base(slug, d["fetched"], cat="carseat", **common), ov))
+        elif is_seat_cat and not re.search(r"בסיס|מתאם|כיסוי|מגן|חגורת", name):
+            print(f"  NOTE {slug} {p['id']} car seat without override (skipped): {name}", file=sys.stderr)
+        elif "טסטים" in cats:
+            continue
+        elif any("עגלות" in c for c in cats) and re.match(r"^(עגלת|עגלה)", name):
+            rows.append(base(slug, d["fetched"], cat="stroller", type=stroller_type(name, cats), **common))
+    return rows
+
+
+STD = {"ISIZE": "R129", "FMVSS213": "FMVSS 213", "ECER4404": "R44/04"}
+HEIGHT = re.compile(r"(?:גובה|גובהם|בגובה)[^.]{0,40}?(\d{2,3})\s*[-–]\s*(\d{2,3})\s*ס[\"”'’]?מ")
+
+
+def joie_price(p):
+    reg = p["price"] or None
+    disc = p.get("discount") or {}
+    cur = reg
+    if disc.get("type") == "overwrite" and disc.get("amount"):
+        try:
+            s = datetime.datetime.strptime(disc["startDate"], "%m/%d/%Y").date()
+            e = datetime.datetime.strptime(disc["endDate"], "%m/%d/%Y").date()
+            if s <= TODAY <= e:
+                cur = disc["amount"]
+        except (KeyError, ValueError):
+            pass
+    if not reg: return None, None
+    return cur, (reg if cur != reg else None)
+
+
+def from_joie():
+    d = load("joie")
+    if not d: return []
+    prods = d["products"]
+    stock = {}
+    for p in prods:
+        key = p.get("mainColorProductId") or p["id"]
+        stock[key] = stock.get(key, 0) + (p.get("quantity") or 0)
+    rows = []
+    for p in prods:
+        if not p.get("isMainColor"):
+            continue
+        types = [t["name"] for t in (p.get("types") or [])]
+        tj = " ".join(types)
+        name = clean(p["name"]).replace("‎", "")
+        cur, reg = joie_price(p)
+        text = clean((p.get("description") or "") + " " + (p.get("specifications") or ""))
+        age = p.get("age") or {}
+        common = dict(brand="Joie", model=name, subtitle=clean(p.get("title")), price=cur, price_reg=reg,
+                      in_stock=int(stock.get(p["id"], 0) > 0),
+                      url=f"https://joiebaby.co.il/products/product/{p['catalogNumber']}", source_id=p["id"])
+        if any(k in tj for k in ("עגלות", "טיולונים")) and "אביזרים" not in tj:
+            if "תאומים" in tj: typ = "twin"
+            elif "טיולונים" in tj: typ = "travel"
+            elif re.search(r"trio|travel system|ramble", name, re.I): typ = "full"
+            else: typ = "stroller"
+            rows.append(base("joie", d["fetched"], cat="stroller", type=typ,
+                             fold={"book": "book", "threeDimensional": "3d", "umbrella": "umbrella"}.get(p.get("foldType"), ""),
+                             age_from_m=age.get("from"), age_to_m=age.get("to"), **common))
+        elif "בסיסים" in tj:
+            continue  # bases are accessories, not seats
+        elif any(k in tj for k in ("סלקלים", "כסאות בטיחות", "בוסטרים")):
+            a0, a1 = age.get("from"), age.get("to")
+            if "סלקלים" in tj: grp = "infant"
+            elif "בוסטרים" in tj and (a0 or 0) >= 12: grp = "booster"
+            elif a0 == 0: grp = "convertible"
+            else: grp = "toddler"
+            hs = [(int(a), int(b)) for a, b in HEIGHT.findall(text) if 30 <= int(a) < int(b) <= 160]
+            # rotating: only when the seat itself is said to rotate (infant carriers rotate only on an optional base)
+            rot = 1 if grp != "infant" and re.search(r"מסתובב|360|סיבוב (?:מלא|חלק|של)", text) else ""
+            std = STD.get(p.get("standard") or "", p.get("standard") or "")
+            if std == "R44/04" and "R129" in text.upper().replace(" ", ""):
+                std = ""  # page text and structured data disagree -> unknown
+            rows.append(base("joie", d["fetched"], cat="carseat", seat_group=grp,
+                             standard=std,
+                             isofix={"included": "included", "optional": "optional", "without": "without"}.get(p.get("isofix") or "", ""),
+                             rotating=rot, age_from_m=a0, age_to_m=a1,
+                             height_min_cm=min(h[0] for h in hs) if hs else "", height_max_cm=max(h[1] for h in hs) if hs else "",
+                             **common))
+    return rows
+
+
+def main():
+    ovs = overrides()
+    rows = from_woo("besafe", "BeSafe", ovs) + from_woo("segal", "Stokke", ovs) + \
+        from_woo("babyjogger", "Baby Jogger", ovs) + from_joie()
+    rows.sort(key=lambda r: (r["cat"], r["seller"], r["model"]))
+    out = ROOT / "data" / "catalog.csv"
+    with open(out, "w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, FIELDS)
+        w.writeheader()
+        w.writerows(rows)
+    by = {}
+    for r in rows:
+        by[(r["seller"], r["cat"])] = by.get((r["seller"], r["cat"]), 0) + 1
+    print(f"wrote {len(rows)} rows -> {out.relative_to(ROOT)}", by)
+
+
+if __name__ == "__main__":
+    main()
