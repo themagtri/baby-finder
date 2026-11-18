@@ -58,7 +58,7 @@ def overrides():
 
 def base(seller, fetched, **kw):
     row = {k: "" for k in FIELDS}
-    row.update(seller=seller, seller_name=SELLER_NAME[seller], checked=fetched)
+    row.update(seller=seller, seller_name=SELLER_NAME.get(seller, seller), checked=fetched)
     row.update({k: ("" if v is None else v) for k, v in kw.items()})
     return row
 
@@ -178,6 +178,41 @@ def from_joie():
     return rows
 
 
+def from_superpharm():
+    """Super-Pharm online incl. marketplace shops: the card's seller is the shop that actually sells it."""
+    from manual_source import kind_of, CYBEX, TAGS
+    d = load("superpharm")
+    if not d: return []
+    rows = []
+    for p in d["products"]:
+        name = clean(p["name"])
+        if re.search(r"מתאם|כיסוי|תיק|בסיס|שמשי|מראה|מגן|פגוש|כילה", name): continue
+        shop = p.get("shop") or ""
+        seller = "superpharm" + (("-" + re.sub(r"[^a-z0-9]+", "", shop.lower()) or "-" + str(abs(hash(shop)) % 10**6)) if shop else "")
+        sname = f"{shop} (דרך סופר-פארם)" if shop else "סופר-פארם"
+        brand = p.get("brand") or ""
+        cp = p["cat_page"]
+        cat, kind = kind_of(name)
+        if cp == "stroller":
+            cat = "stroller"; kind = kind if kind in ("twin", "full", "travel") else ("travel" if "טיולון" in name else "stroller")
+        else:
+            cat = "carseat"
+            if cp == "booster": kind = "booster"
+            elif cp == "infant": kind = "infant"
+            elif not kind or kind not in ("infant", "convertible", "toddler", "booster"):
+                kind = next((t["seat_group"] for t in TAGS if re.search(t["pattern"], name, re.I)), "")
+        price = p.get("price")
+        price = (int(price) if price == int(price) else price) if price else None
+        row = base("superpharm", d["fetched"], cat=cat, brand=brand, model=name, seller_name=sname,
+                   price=price, in_stock=int(bool(p.get("in_stock"))), url=p["url"],
+                   import_status=p.get("import") or "", source_id=p["url"].rsplit("/", 1)[-1])
+        row["seller"] = seller
+        if cat == "stroller": row["type"] = kind
+        else: row["seat_group"] = kind
+        rows.append(row)
+    return rows
+
+
 def family(r):
     """Same-model key across sellers (for the price comparison on each card). Only models we can match safely;
     the type must also match (a stroller sold with a bassinet is not compared with one sold without)."""
@@ -187,6 +222,13 @@ def family(r):
     if r["brand"] == "Cybex":
         f = next((f for f in CYBEX if re.search(f[0], name, re.I)), None)
         fam = f[1] if f else None
+    elif r["brand"] == "Chicco":
+        from manual_source import CHICCO
+        c = next((c for c in CHICCO if c[0].lower() in name.lower()), None)
+        fam = c[1] if c else None
+    elif r["brand"] == "Joie":
+        latin = re.sub(r"(?i)joie|™|®", " ", " ".join(re.findall(r"[A-Za-z0-9™\- ]+", name)))
+        fam = "Joie " + "-".join(latin.lower().split()) if latin.strip() else None
     elif r["brand"] == "BeSafe" and re.search(r"turn b", name, re.I):
         fam = "BeSafe iZi Turn B"
     elif r["brand"] == "Stokke" and re.search(r"yoyo\s*(3|³)|יויו 3", name, re.I):
@@ -205,7 +247,7 @@ def family(r):
 def main():
     ovs = overrides()
     rows = from_woo("besafe", "BeSafe", ovs) + from_woo("segal", "Stokke", ovs) + \
-        from_woo("babyjogger", "Baby Jogger", ovs) + from_joie() + from_manual(base)
+        from_woo("babyjogger", "Baby Jogger", ovs) + from_joie() + from_manual(base) + from_superpharm()
     for r in rows:
         r["family"] = family(r)
     rows.sort(key=lambda r: (r["cat"], r["seller"], r["model"]))
