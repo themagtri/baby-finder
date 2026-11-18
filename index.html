@@ -176,6 +176,7 @@ section.screen.on{display:block;animation:fade .35s ease}
 .badge.oos{background:var(--blush)}
 .badge.sp{background:var(--navy);color:#fff}
 .badge.imp{background:var(--sky);color:var(--navy)}
+.badge.aio{background:var(--ink);color:var(--paper)}
 .item .body{padding:16px;display:flex;flex-direction:column;gap:10px;flex:1}
 .logo-img{height:20px;width:auto;max-width:100px;display:block}
 /* brands without a free logo: the name in one neutral ellipse, same style for every brand
@@ -381,7 +382,19 @@ const STAGES = [
 // age tiles show car seats only; infant carriers are their own option ("סלקלים"), first and full width.
 // A seat whose stated range covers several ages appears under each of them.
 for(const st of STAGES){ const t=st.test; st.test = i => i.g==="infant" ? false : t(i); }
-STAGES.unshift({k:"infant", he:"סלקלים", sub:"מושב נישא לתינוק, מגיל לידה", wide:1, test:(i)=> i.g==="infant"});
+// order: from birth first, then infant carriers (same tile size), then the older ages
+STAGES.splice(1, 0, {k:"infant", he:"סלקלים", sub:"מושב נישא לתינוק, מגיל לידה", test:(i)=> i.g==="infant"});
+// All in One = a seat for (almost) every age: the seller's range/type covers at least three of the four
+// age ranges, or the seller's own product name says so. Tagged on the card and listed last in each age.
+// names: the seller's own wording, plus models sold as "All-in-One" by the maker (Chicco OneFit / Fit3X ClearTex
+// All-in-One, EverOne 0-12y, Britax One4Life 40-150 cm, Evenflo All4Stages - web lookups 2026-11-18)
+const AIO_NAME = /all.?in.?one|all ?4 ?stages|4 ?in ?1|4in1|4 ב-?1|הכל באחד|onefit|fit ?3 ?x|ever ?one|one4life|וואן פיט|פיט 3 איקס|אבר וואן|וואן פור לייף/i;
+function isAIO(i){
+  if(i.c!=="carseat" || i.g==="infant" || i.g==="booster") return false;
+  if(AIO_NAME.test(i.n)) return true;
+  const st = STAGES.filter(s=>s.k!=="infant" && s.test(i)===true).map(s=>s.k);
+  return st.includes("newborn") && st.length>=3;   // from birth and on to at least age 4-7
+}
 function covers(i,m){ if(i.a0==null||i.a1==null) return null; return i.a0<=m && i.a1>=m; }
 // when the seller states no age range, the stage follows the seat type (tagging only; the card still says "לא צוין")
 const GROUP_STAGES = {infant:["newborn"], convertible:["newborn","toddler"], toddler:["toddler","kid4"], booster:["kid4","kid7"]};
@@ -545,6 +558,7 @@ function card(i, idx){
   const sv = saving(i);
   const badges = [
     i.sp ? '<span class="badge sp">ממומן</span>' : "",
+    isAIO(i) ? '<span class="badge aio">לכל הגילאים · All in One</span>' : "",
     i.imp==="official" ? '<span class="badge imp">יבואן רשמי, לפי המוכר</span>' : i.imp==="parallel" ? '<span class="badge imp">יבוא מקביל, לפי המוכר</span>' : "",
     i.st!==1 ? '<span class="badge oos">אזל במלאי באתר</span>' : ""
   ].join("");
@@ -578,7 +592,9 @@ function renderRefine(){
 }
 function renderResults(){
   const {list, hiddenUnknown} = filtered();
+  const aioLast = S.need==="carseat" && S.stage && S.stage!=="infant";
   const sorted = list.slice().sort((a,b)=>{
+    if(aioLast){ const d = isAIO(a)-isAIO(b); if(d) return d; }  // age-specific seats first, All in One at the end
     if(S.sort==="name") return a.n.localeCompare(b.n,"he");
     if(S.sort==="save") return saving(b)-saving(a);
     if(a.p==null && b.p==null) return 0; if(a.p==null) return 1; if(b.p==null) return -1;
