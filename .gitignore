@@ -4,3 +4,4 @@ __pycache__/
 .env
 scratch/
 data/raw/
+screenshots/
