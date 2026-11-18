@@ -80,7 +80,7 @@ section.screen.on{display:block;animation:fade .35s ease}
 /* hero (step 1) */
 .hero{position:relative;border-radius:28px;overflow:hidden;min-height:300px;display:flex;align-items:flex-end;margin-top:24px;background:#cdbfb4 center/cover no-repeat}
 .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,10,.12) 0%,rgba(10,10,10,.35) 45%,rgba(10,10,10,.72) 100%)}
-@media (max-width:620px){.hero{min-height:380px}.hero h1{font-size:1.9rem}}
+@media (max-width:620px){.hero h1{font-size:1.7rem}}
 .hero .in{position:relative;z-index:1;color:#fff;padding:32px clamp(20px,4vw,48px)}
 .hero h1{margin:8px 0 8px;color:#fff}
 .hero p{margin:0;font-size:1.08rem;max-width:560px;color:#fff}
@@ -135,7 +135,10 @@ section.screen.on{display:block;animation:fade .35s ease}
 .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line-strong)}
 .btn.go{background:var(--sky);color:var(--navy)}
 .btn.go:hover{background:#9bb9e1}
-@media (max-width:560px){.cta-bar .btn{padding:12px 18px}.cta-bar .btn.ghost{display:none}}
+@media (max-width:560px){.cta-bar .btn{padding:12px 18px}.cta-bar .btn.ghost{display:none}
+  .tiles{grid-template-columns:1fr 1fr;gap:10px}.tile,.tiles.two .tile{min-height:150px}.tile .t{font-size:1.15rem}.tile small{font-size:.8rem}.tile .txt{padding:12px}
+  .grid{grid-template-columns:1fr;gap:14px}.kf li{padding:6px 8px}.steps{margin-top:16px}.steps li{min-width:0}.steps button{font-size:.78rem}
+  h1{margin-top:18px}.hero{min-height:230px;margin-top:14px}.hero .in{padding:18px}.hero p{font-size:.95rem}.steps button{white-space:nowrap}.announce{font-size:.75rem;padding:7px 12px}.announce .more{display:none}.refine{gap:12px}.facts{gap:6px 18px}}
 
 /* results */
 .res-head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px}
@@ -148,17 +151,21 @@ section.screen.on{display:block;animation:fade .35s ease}
 .refine .lbl{font-size:.75rem;font-weight:700;letter-spacing:.1em;color:var(--muted);margin-bottom:6px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:22px}
 .item{background:var(--paper);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow)}
-.item .ph{position:relative;aspect-ratio:16/10;background:#cdbfb4 center/cover no-repeat}
-.item .ph .ill{position:absolute;bottom:10px;inset-inline-end:10px;background:rgba(255,251,248,.9);font-size:.7rem;border-radius:999px;padding:2px 9px}
-.item .ph .badges{position:absolute;top:12px;inset-inline-start:12px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.item .head{display:flex;gap:12px;align-items:flex-start}
+.item .ht{min-width:0;flex:1}
+.ico{flex:none;width:52px;height:52px;padding:6px;border-radius:14px;background:var(--blush);stroke:var(--navy);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.item .badges{display:flex;flex-wrap:wrap;gap:6px}
+.clubs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.8rem}
+.clubs .lbl2{color:var(--muted)}
+.club{background:var(--sky);color:var(--navy);border-radius:999px;padding:2px 10px;font-weight:600}
 .badge{font-size:.68rem;font-weight:700;letter-spacing:.08em;border-radius:10px;padding:4px 10px;background:var(--paper)}
 .badge.save{background:var(--sage)}
 .badge.oos{background:var(--blush)}
 .badge.sp{background:var(--navy);color:#fff}
 .badge.imp{background:var(--sky);color:var(--navy)}
-.item .body{padding:18px 18px 18px;display:flex;flex-direction:column;gap:10px;flex:1}
+.item .body{padding:16px;display:flex;flex-direction:column;gap:10px;flex:1}
 .brand{font-size:.72rem;font-weight:700;letter-spacing:.12em;color:var(--muted)}
-.item h3{margin:0;font-family:var(--serif);font-weight:500;font-size:1.35rem;line-height:1.25}
+.item h3{margin:0;font-family:var(--serif);font-weight:500;font-size:1.15rem;line-height:1.3}
 .item .sub{margin:0;color:var(--muted);font-size:.9rem}
 .price{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .price .now{font-size:1.45rem;font-weight:600}
@@ -299,6 +306,8 @@ body.still *{animation:none!important;transition:none!important}
 (function(){
 "use strict";
 const ITEMS = window.ITEMS || [];
+const CLUBS = window.CLUBS || {};   // seller -> [{n: club name, src: source url}]
+const CLUB_NAMES = [...new Set(Object.values(CLUBS).flat().map(c=>c.n))].sort((a,b)=>a.localeCompare(b,"he"));
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const nf = new Intl.NumberFormat("he-IL");
@@ -314,17 +323,19 @@ const PH = {
   g_infant:"1619719287848-883c8f26efbc", g_convertible:"1633111046443-13a0c30033ea", g_toddler:"1633111046443-13a0c30033ea", g_booster:"1761047321481-abbdcfb7ff00",
   budget:"1510154221590-ff63e90a136f"
 };
-// several photos per card type so neighbouring cards do not repeat (all checked by eye, Unsplash licence)
-const CARD_PH = {
-  t_full:["1636384919179-d936e55c5cca","1528121108018-743eef2e4a7a","1788193395607-4163258ab166"],
-  t_stroller:["1784751722840-471e603b467f","1760160639570-e682e4595f86","1733380005522-b8d76ce49d13"],
-  t_travel:["1773063082298-91b61b59bc99","1611223355350-5be15e624fdf","1760160639570-e682e4595f86"],
-  t_twin:["1744424846144-d57267a19ee8","1537376248011-d31fb998ae8f"],
-  g_infant:["1619719287848-883c8f26efbc","1790243637140-2aa6f40b909b"],
-  g_convertible:["1633111046443-13a0c30033ea","1619719287848-883c8f26efbc","1790243637140-2aa6f40b909b"],
-  g_toddler:["1633111046443-13a0c30033ea","1761047321481-abbdcfb7ff00"],
-  g_booster:["1761047321481-abbdcfb7ff00","1633111046443-13a0c30033ea"]
+// small line drawings per card type (our own SVG, no photos on product cards: owner found photos confusing)
+const ICON_PATHS = {
+  t_full:'<path d="M6 10h4l4 16h20l5-13H13"/><path d="M15 13a10 10 0 0 1 20 0"/><path d="M16 26l-4 8M32 26l4 8"/><circle cx="12" cy="37" r="3"/><circle cx="36" cy="37" r="3"/>',
+  t_stroller:'<path d="M8 10h4l5 15h18"/><path d="M17 25c-3-6-2-12 6-14 7-1 11 4 11 10"/><path d="M19 25l-5 9M33 25l4 9"/><circle cx="14" cy="37" r="3"/><circle cx="37" cy="37" r="3"/>',
+  t_travel:'<path d="M30 6l-12 28"/><path d="M30 6h5"/><path d="M22 24h12l-4 10"/><path d="M18 34l-4 3M30 34l3 3"/><circle cx="13" cy="38" r="2.5"/><circle cx="34" cy="38" r="2.5"/>',
+  t_twin:'<path d="M5 10h4l4 14h26"/><path d="M14 24c-2-5 0-10 6-10s7 5 6 10M26 24c-2-5 0-10 6-10s7 5 6 10"/><path d="M15 24l-4 10M37 24l3 10"/><circle cx="11" cy="37" r="3"/><circle cx="40" cy="37" r="3"/><circle cx="25" cy="37" r="3"/>',
+  t_carseatstroller:'<path d="M12 18c0-6 5-10 12-10s12 4 12 10v8H12z"/><path d="M14 26l-3 8M34 26l3 8"/><circle cx="11" cy="37" r="3"/><circle cx="37" cy="37" r="3"/>',
+  g_infant:'<path d="M8 22c0 9 7 14 16 14s16-5 16-14"/><path d="M8 22h32"/><path d="M12 22c2-10 22-10 24 0"/><path d="M10 20c2-12 26-12 28 0" stroke-dasharray="2 3"/><path d="M18 30h12"/>',
+  g_convertible:'<path d="M16 6h12a4 4 0 0 1 4 4v14l6 4v8a4 4 0 0 1-4 4H14a4 4 0 0 1-4-4V12a6 6 0 0 1 6-6z"/><path d="M18 16h8M20 22v10"/><path d="M6 42h36"/><path d="M24 42v-2"/><path d="M38 12a8 8 0 0 1 0 10" /><path d="M38 12l-2-2M38 22l-2 2"/>',
+  g_toddler:'<path d="M16 6h12a4 4 0 0 1 4 4v14l6 4v8a4 4 0 0 1-4 4H14a4 4 0 0 1-4-4V12a6 6 0 0 1 6-6z"/><path d="M18 16h8M20 22v10"/><path d="M6 42h36"/>',
+  g_booster:'<path d="M14 14h16a3 3 0 0 1 3 3v9l5 3v7a3 3 0 0 1-3 3H13a3 3 0 0 1-3-3V18a4 4 0 0 1 4-4z"/><path d="M16 22h12"/><path d="M6 42h36"/>'
 };
+const icon = k => `<svg class="ico" viewBox="0 0 48 48" aria-hidden="true">${ICON_PATHS[k]||ICON_PATHS.t_stroller}</svg>`;
 const TICK = '<span class="tick" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span>';
 
 const NEEDS = [
@@ -357,7 +368,7 @@ const ISO_HE = {included:"כלול", optional:"בסיס נפרד", without:"לל
 const STD_HE = {"R129":"R129 (i-Size)"};
 const FOLD_HE = {book:"ספר", "3d":"תלת-ממדי", umbrella:"מטרייה"};
 
-const S = {step:1, need:null, types:new Set(), stage:null, reqs:new Set(), max:null, stock:true, noprice:true, sort:"low"};
+const S = {step:1, need:null, types:new Set(), stage:null, reqs:new Set(), max:null, stock:true, noprice:true, sort:"low", clubs:new Set()};
 
 function poolNeed(){ return ITEMS.filter(i=>i.c===S.need); }
 function filtered(opts){
@@ -371,6 +382,7 @@ function filtered(opts){
       for(const k of S.reqs){ const r=REQS.find(x=>x.k===k).test(i); if(r===false) return false; if(r===null) unk=true; }
       if(unk){ hiddenUnknown++; return false; }
     }
+    if(S.clubs.size && !(CLUBS[i.s]||[]).some(c=>S.clubs.has(c.n))) return false;
     if(!opts.ignoreBudget){
       if(S.stock && i.st!==1) return false;
       if(i.p==null){ if(!S.noprice) return false; }
@@ -470,9 +482,13 @@ function facts(i){
   if(f.length%2) f[f.length-1].push("wide");
   return f.map(([k,v,w])=>`<li${w?' class="wide"':""}><span class="k">${k}</span>${v}</li>`).join("");
 }
+function clubTags(i){
+  const cs = CLUBS[i.s]||[];
+  if(!cs.length) return "";
+  return `<div class="clubs"><span class="lbl2">הטבה במועדון:</span>${cs.map(c=>`<span class="club">${esc(c.n)}</span>`).join("")}</div>`;
+}
 function card(i, idx){
-  const set = CARD_PH[i.c==="carseat" ? "g_"+i.g : "t_"+i.t] || [PH.stroller];
-  const img = set[idx % set.length];
+  const ik = i.c==="carseat" ? "g_"+i.g : "t_"+i.t;
   const sv = saving(i);
   const badges = [
     i.sp ? '<span class="badge sp">ממומן</span>' : "",
@@ -482,13 +498,12 @@ function card(i, idx){
   ].join("");
   const price = i.p!=null ? `<div class="price"><span class="now">${shekel(i.p)}</span>${i.pr? `<s><span class="sr-only">מחיר רגיל </span>${shekel(i.pr)}</s>`:""}${i.pn? `<span class="pn">${esc(i.pn)}</span>`:""}</div>` : `<div class="price none">המחיר לא מופיע באתר המוכר</div>`;
   return `<article class="item">
-    <div class="ph" style="${BG(img,600)}" role="img" aria-label="תמונה להמחשה, לא המוצר"><div class="badges">${badges}</div><span class="ill" aria-hidden="true">תמונה להמחשה</span></div>
     <div class="body">
-      <span class="brand">${esc(i.b)}</span>
-      <h3>${esc(i.n)}</h3>
-      ${i.d? `<p class="sub">${esc(i.d)}</p>`:""}
+      <div class="head">${icon(ik)}<div class="ht"><span class="brand">${esc(i.b)}</span><h3>${esc(i.n)}</h3>${i.d? `<p class="sub">${esc(i.d)}</p>`:""}</div></div>
+      ${badges? `<div class="badges">${badges}</div>`:""}
       ${price}
       <ul class="kf">${facts(i)}</ul>
+      ${clubTags(i)}
       <div class="seller"><span>נמכר ב: <b>${esc(i.sn)}</b></span><span class="chk">נבדק ${fmtDate(i.chk)}</span></div>
       <a class="btn go" href="${esc(i.u)}" target="_blank" rel="noopener nofollow" data-out="${esc(i.s)}">לדף המוצר אצל המוכר<span class="sr-only"> (נפתח בחלון חדש)</span><span aria-hidden="true">↗</span></a>
     </div>
@@ -504,6 +519,8 @@ function renderRefine(){
       STAGES.map(s=>`<button class="opt" type="button" data-stage="${s.k}" aria-pressed="${S.stage===s.k}">${s.he}</button>`).join("")+`</div></div>`;
     html += `<div><div class="lbl">דרישות</div><div class="opt-row small">`+REQS.map(r=>`<button class="opt" type="button" data-req="${r.k}" aria-pressed="${S.reqs.has(r.k)}">${r.he}</button>`).join("")+`</div></div>`;
   }
+  if(CLUB_NAMES.length) html += `<div><div class="lbl">מועדון צרכנות שלי</div><div class="opt-row small"><button class="opt" type="button" data-club="" aria-pressed="${!S.clubs.size}">לא משנה</button>`+
+      CLUB_NAMES.map(n=>`<button class="opt" type="button" data-club="${esc(n)}" aria-pressed="${S.clubs.has(n)}">${esc(n)}</button>`).join("")+`</div></div>`;
   html += `<div><div class="lbl">מלאי</div><div class="opt-row small"><button class="opt" type="button" data-stock="1" aria-pressed="${S.stock}">רק במלאי</button><button class="opt" type="button" data-stock="0" aria-pressed="${!S.stock}">הכל</button></div></div>`;
   $("#refine").innerHTML = html;
 }
@@ -530,6 +547,7 @@ function renderChips(){
   if(S.need==="stroller" && S.types.size) c.push([...S.types].map(k=>TYPES.find(t=>t.k===k).he).join(", "));
   if(S.need==="carseat" && S.stage) c.push(STAGES.find(s=>s.k===S.stage).he);
   if(S.need==="carseat") for(const k of S.reqs) c.push(REQS.find(r=>r.k===k).he);
+  for(const k of S.clubs) c.push("מועדון: "+k);
   if(S.step>=3 && S.max!=null && S.max<+$("#maxPrice").max) c.push("עד "+shekel(S.max));
   $("#chips").innerHTML=c.map(x=>`<span class="chip">${x}</span>`).join("");
 }
@@ -544,7 +562,7 @@ function renderBar(){
 }
 
 /* ---------- events ---------- */
-function reset(){ S.need=null; S.types.clear(); S.stage=null; S.reqs.clear(); S.max=null; S.stock=true; S.noprice=true; S.sort="low"; }
+function reset(){ S.clubs.clear(); S.need=null; S.types.clear(); S.stage=null; S.reqs.clear(); S.max=null; S.stock=true; S.noprice=true; S.sort="low"; }
 document.addEventListener("click", e=>{
   const b=e.target.closest("button"); if(!b || b.closest("#a11yPanel")) return;
   if(b.dataset.need){ if(S.need!==b.dataset.need){ reset(); S.need=b.dataset.need; } renderHome(); go(2); return; }
@@ -553,6 +571,7 @@ document.addEventListener("click", e=>{
   if(b.dataset.type!==undefined){ const k=b.dataset.type; if(!k) S.types.clear(); else S.types.has(k)? S.types.delete(k) : S.types.add(k); rerender(); return; }
   if(b.dataset.stage!==undefined){ const k=b.dataset.stage||null; S.stage = (S.step===2 && S.stage===k) ? null : k; rerender(); return; }
   if(b.dataset.req){ const k=b.dataset.req; S.reqs.has(k)? S.reqs.delete(k) : S.reqs.add(k); rerender(); return; }
+  if(b.dataset.club!==undefined){ const k=b.dataset.club; if(!k) S.clubs.clear(); else S.clubs.has(k)? S.clubs.delete(k) : S.clubs.add(k); rerender(); return; }
   if(b.dataset.stock!==undefined){ S.stock=b.dataset.stock==="1"; rerender(); return; }
 });
 function rerender(){ if(S.step===2) renderPrefs(); if(S.step===4) renderResults(); renderChips(); renderBar(); }
@@ -587,7 +606,7 @@ document.addEventListener("keydown",e=>{ if(e.key==="Escape" && !$("#a11yPanel")
 const dates=[...new Set(ITEMS.map(i=>i.chk).filter(Boolean))].sort();
 const last = dates.length ? fmtDate(dates[dates.length-1]) : "";
 $("#chkDate").textContent = last;
-if(last) $("#announce").textContent = `המחירים נבדקו ישירות באתרי המוכרים ב-${last} · אין כאן מוכר, רק קישור ישיר לדף המוצר`;
+if(last) $("#announce").innerHTML = `המחירים נבדקו באתרי המוכרים ב-${last}<span class="more"> · אין כאן מוכר, רק קישור ישיר לדף המוצר</span>`;
 renderHome(); go(1, true);
 })();
 </script>
