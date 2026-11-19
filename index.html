@@ -82,7 +82,7 @@ section.screen.on{display:block;animation:fade .35s ease}
 .hero{position:relative;border-radius:28px;overflow:hidden;min-height:420px;display:flex;align-items:flex-end;margin-top:24px;background:#cdbfb4 center/cover no-repeat}
 .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,10,.05) 0%,rgba(10,10,10,.45) 40%,rgba(10,10,10,.82) 100%)}
 .hero h1{font-size:clamp(1.9rem,4.6vw,3.2rem);font-weight:800;line-height:1.12;max-width:720px}
-.hero .hl{background:var(--sky);color:var(--navy);border-radius:10px;padding:0 .18em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.hero .hl{text-decoration:underline;text-decoration-color:var(--sky);text-decoration-thickness:.12em;text-underline-offset:.16em}
 .hero p{font-weight:500}
 .hero-vals{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
 .hero-vals li{background:rgba(255,251,248,.16);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(4px);border-radius:999px;padding:6px 12px;font-size:.9rem;font-weight:600;color:#fff}
@@ -351,7 +351,6 @@ body.still *{animation:none!important;transition:none!important}
         <h1 id="h1a"><span class="hl">משווים מחירים</span> של עגלות וכסאות בטיחות בישראל</h1>
         <p>משווים, מסננים ובוחרים מה שנוח לכם. גם לפי תווי קנייה.</p>
         <ul class="hero-vals" id="heroVals"></ul>
-        <div class="hero-cta"><button class="btn hero-go" type="button" data-need="stroller">חיפוש עגלה</button><button class="btn hero-go alt" type="button" data-need="carseat">חיפוש כסא בטיחות</button></div>
       </div>
     </div>
     <ul class="facts" id="facts"></ul>
