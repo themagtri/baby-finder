@@ -353,7 +353,6 @@ body.still *{animation:none!important;transition:none!important}
         <ul class="hero-vals" id="heroVals"></ul>
       </div>
     </div>
-    <ul class="facts" id="facts"></ul>
     <h2 class="q">מה אתם מחפשים?</h2>
     <div class="tiles two" id="needOpts"></div>
     <p class="photo-credit">צילומים להמחשה: Unsplash</p>
@@ -606,8 +605,7 @@ function tile(attrs, img, title, sub, cnt, pressed, disabled){
 function renderHome(){
   $("#hero").style.cssText = BG(PH.hero,1600);
   const sellers=new Set(ITEMS.map(i=>i.s)).size, brands=new Set(ITEMS.map(i=>i.b)).size;
-  $("#heroVals").innerHTML = `<li>${sellers} חנויות, ${nf.format(ITEMS.length)} מוצרים</li><li>כל המחירים של דגם בכרטיס אחד</li><li>סינון לפי תווי קנייה</li>`;
-  $("#facts").innerHTML = `<li><b>${nf.format(ITEMS.length)}</b>מוצרים</li><li><b>${brands}</b>מותגים</li><li><b>${sellers}</b>מוכרים</li>`;
+  $("#heroVals").innerHTML = `<li>${sellers} חנויות, ${brands} מותגים, ${nf.format(ITEMS.length)} מוצרים</li><li>כל המחירים של דגם בכרטיס אחד</li><li>סינון לפי תווי קנייה</li>`;
   $("#needOpts").innerHTML = NEEDS.map(n=>tile(`data-need="${n.k}"`, PH[n.k], n.he, n.sub, nf.format(ITEMS.filter(i=>i.c===n.k).length)+" מוצרים", S.need===n.k)).join("");
 }
 function renderPrefs(){
