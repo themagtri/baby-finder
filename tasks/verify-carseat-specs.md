@@ -39,8 +39,14 @@
 - ISOFIX: 40 → **103** (50 מהיצרן, 13 מהיבואן). 22 כרטיסים מציגים LATCH (דגמים אמריקאיים).
 - מקורות: 38 שורות ב-`data/maker_specs.csv`, לכל שורה URL.
 
-## נשאר לא ידוע (לסבב הבא, אם יש מקור)
+## תוצאות סבב שני (19.11.2026)
+- תקן: 134 → **141**. ISOFIX: 103 → **113** (25 מהם LATCH).
+- נוספו: Maxi-Cosi RodiFix M, Nuna PRUU / TODL next / RAVA next, Graco Affix ו-Energi (ISOFIX),
+  Britax Galaxy360 Slim (LATCH), Chicco KidFit Adapt Plus, Kinderkraft FIX2GO / I-LITE (תקן בלבד) / Comfort Up.
+- Kinderkraft ממקור קמעונאי (galaxus), כי אתר היצרן לא עלה בחיפוש.
+
+## נשאר לא ידוע
 - מותגים פרטיים בלי מקור יצרן ברשת: Moona, Shilav, Infanti, Twigy, Dilians, Babysafe, Dearlee, Norr, Easy baby, Harmony, MU.
-- לא אומתו: Maxi-Cosi Mica 2 Pro Slide 360, RodiFix M; Britax Swivel Grow Max (+ ISOFIX של קווי ה-US);
-  Graco EasyTurn 360, Affix ו-Junior Maxi (ISOFIX); Nuna PRUU, RAVA next, TODL next, LUMN;
-  Kinderkraft I-LITE, FIX2GO ו-Comfort Up; Babyark; Chicco KidFit Adapt Plus; BeSafe iZi Go Modular (בשילב).
+- Graco EasyTurn 360 **Slim**: אתר Graco מתאר רק את EasyTurn 360 2-in-1, והגרסה Slim לא אומתה.
+- Maxi-Cosi Mica 2 Pro Slide 360 (לא ברור שזה אותו דגם כמו Mica Pro Eco); Nuna LUMN; Graco Junior Maxi (ISOFIX);
+  Britax Swivel Grow Max; Babyark; Kinderkraft I-LITE (ISOFIX: נמכר עם בסיס ובלעדיו).

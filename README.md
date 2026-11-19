@@ -131,3 +131,4 @@ python -I scripts/site_data.py
   - דגמים אמריקאיים מוצגים כ-FMVSS 213 / LATCH.
   - מה שלא אומת נשאר "לא צוין" (פירוט ב-`tasks/verify-carseat-specs.md`).
   - תוקן באג: סימני גבול-מילה בביטויים של name_facts נשמרו כתווי בקרה, ולכן "i-Fix", "R44" ו-"360" לא תמיד זוהו.
+  - סבב שני: תקן ב-141, ISOFIX ב-113 (25 LATCH). נוספו Nuna, Graco EU, Kinderkraft, RodiFix M ו-KidFit Adapt.

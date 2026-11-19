@@ -32,8 +32,18 @@ Evenflo,revolve,FMVSS 213,latch,https://www.evenflo.com/pages/revolve-360-slim-f
 Evenflo,all4stages,FMVSS 213,,https://www.evenflo.com/collections/car-seats,2026-11-19,Evenflo: car seats meet FMVSS 213 and 302
 Britax,one4life|וואן פור לייף,FMVSS 213,,https://us.britax.com/support/faq/convertible-car-seats,2026-11-19,US-market Britax line (ClickTight); FMVSS 213
 Britax,poplar|פופלר,FMVSS 213,,https://us.britax.com/support/faq/convertible-car-seats,2026-11-19,Britax US FAQ: Poplar / Poplar S (ClickTight) - US model
-Britax,galaxy ?360,FMVSS 213,,https://us.britax.com/shop/car-seats/galaxy360-slim-rotating-convertible-car-seat,2026-11-19,us.britax.com product (US model)
+Britax,galaxy ?360,FMVSS 213,latch,https://us.britax.com/press/archive/britax-introduces-galaxy360-slim-rotating-convertible-car-seat,2026-11-19,Britax US press release: Galaxy360 Slim (US model) installs with LATCH or seat belt
 Britax,grow with you|growwithyou|גרו,FMVSS 213,,https://us.britax.com/support/faq/convertible-car-seats,2026-11-19,US-market Britax harness-to-booster line
 Maxi-Cosi,אמה 360|emme 360,FMVSS 213,,https://www.maxicosi.com/us-en,2026-11-19,Emme 360 is a Maxi-Cosi US rotating convertible
 Joie,i ?-?snug,R129,optional,https://dl.joiebaby.com/Instruction_Manual/GL/i-Snug-2/Joie-carseat-i-snug-2-instruction-manual.pdf,2026-11-19,ECE R129/03 40-75 cm; ISOFIX via i-Base 2 (separate)
 Joie,i ?-?jemini,R129,optional,https://dl.joiebaby.com/Instruction_Manual/GL/i-Base-2/Joie-carseat-i-base-2-instruction-manual.pdf,2026-11-19,i-Base 2 manual covers i-Jemini; R129; base separate
+Maxi-Cosi,רודיפיקס m|rodifix m,R129,included,https://images.maxi-cosi.com/dorel-public-storage-prod/manuals/MC8757_CRS_RodiFixMRiSize_UM_LR.pdf,2026-11-19,RodiFix M i-Size manual: ECE R129/03; ISOFIX connectors
+Nuna,pruu,R129,included,https://nunababy.com/en/pruu-convertible-car-seat,2026-11-19,Nuna: R129 i-Size; ISOFIX (True lock)
+Nuna,todl next,R129,optional,https://nunababy.com/sg/todl-next-convertible-car-seat,2026-11-19,Nuna: R129 i-Size; ISOFIX via BASE next (sold separately)
+Nuna,rava,FMVSS 213,latch,https://nunababy.com/sg/rava-next-convertible-car-seat,2026-11-19,Nuna: certified to FMVSS 213a/213b; lower anchor attachments
+Graco,affix,R129,included,https://gracobaby.eu/en/affix-i-size-r129-isofix-highback-booster,2026-11-19,Graco EU: Affix i-Size R129 highback booster with ISOFIX connectors
+Graco,energi,R129,included,https://gracobaby.eu/uk/energi-i-size-r129-2-in-1-harness-booster-isofix-top-tether,2026-11-19,Graco EU: Energi i-Size R129 with ISOFIX + top tether
+Chicco,kidfit adapt,FMVSS 213,latch,https://www.chiccousa.com/shop-our-products/car-seats/booster/kidfit-adapt-plus-2-in-1-belt-positioning-booster-car-seat---ember/07079728860070.html,2026-11-19,Chicco US: meets FMVSS 213b; Quick Release LATCH
+Kinderkraft,fix2go,R129,included,https://www.galaxus.at/en/s10/product/kinderkraft-fix2go-child-car-seat-ece-r129i-size-standard-child-car-seat-56737799,2026-11-19,retailer listing: R129 i-Size 76-150 cm; ISOFIX + top tether
+Kinderkraft,i-lite,R129,,https://www.galaxus.at/en/s10/product/kinderkraft-kinderautositz-i-lite-baby-car-seat-ece-r129i-size-standard-child-car-seat-61747764,2026-11-19,retailer listing: R129 i-Size; sold with and without ISOFIX base - ISOFIX left unknown
+*,kinderkraft comfort up,R129,without,https://galaxus.nl/en/s10/product/kinderkraft-comfort-up-child-seat-ece-r129i-size-standard-child-car-seat-52335865,2026-11-19,retailer listing: R129 i-Size 76-150 cm; installed with 3-point seat belt
