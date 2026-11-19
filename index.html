@@ -152,6 +152,13 @@ section.screen.on{display:block;animation:fade .35s ease}
 .res-head h1{margin-bottom:4px}
 .res-head p{margin:0;color:var(--muted)}
 .sort{display:flex;align-items:center;gap:8px;font-size:.9rem}
+.res-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.filter-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-strong);background:var(--paper);color:var(--ink);border-radius:999px;padding:9px 16px;min-height:44px;font:inherit;font-weight:600;cursor:pointer}
+.filter-btn[aria-expanded="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.filter-btn .fun{width:1.1em;height:1.1em}
+.fcount{background:var(--navy);color:#fff;border-radius:999px;font-size:.75rem;min-width:1.5em;padding:1px 6px;text-align:center}
+.fcount:empty{display:none}
+.refine[hidden]{display:none}
 .sort select{background:var(--paper);border:1px solid var(--line-strong);border-radius:999px;padding:8px 14px}
 .disclaimer{background:var(--blush);padding:14px 18px;border-radius:14px;font-size:.92rem;margin:18px 0;max-width:900px}
 .refine{display:flex;flex-wrap:wrap;gap:18px;margin:18px 0 22px;padding:16px 0;border-block:1px solid var(--line)}
@@ -345,10 +352,13 @@ body.still *{animation:none!important;transition:none!important}
   <section class="screen" id="s4" aria-labelledby="resTitle">
     <div class="res-head">
       <div><h1 id="resTitle">תוצאות</h1><p id="resCount" aria-live="polite"></p></div>
-      <label class="sort">מיון <select id="sortSel"><option value="low">מחיר: מהזול</option><option value="high">מחיר: מהיקר</option><option value="save">הנחה הגדולה ביותר</option><option value="name">שם</option></select></label>
+      <div class="res-tools">
+      <button class="filter-btn" type="button" id="filterBtn" aria-expanded="false" aria-controls="refine"><svg class="fun" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 4h18l-7 8.5V19l-4 2v-8.5z"/></svg><span>סינון</span><span class="fcount" id="filterCount"></span></button>
+      <label class="sort">מיון <select id="sortSel"><option value="mix">סדר מעורב</option><option value="low">מחיר: מהזול</option><option value="high">מחיר: מהיקר</option><option value="save">הנחה הגדולה ביותר</option><option value="name">שם</option></select></label>
+      </div>
     </div>
     <div class="disclaimer" id="seatDisc" hidden>המידע במושבי הבטיחות (תקן, גיל, גובה, ISOFIX, סיבוב) מועתק מדף המוצר של המוכר כפי שהוא. איננו ממליצים על בטיחות ואיננו מדרגים מושבים. "לא צוין" פירושו שהמוכר לא כתב את הנתון. לפני קנייה ובזמן ההתקנה פעלו לפי הוראות היצרן.</div>
-    <div class="refine" id="refine"></div>
+    <div class="refine" id="refine" hidden></div>
     <div class="grid" id="grid"></div>
     <p class="note" id="hiddenNote"></p>
   </section>
@@ -482,7 +492,7 @@ const src = (kind, url) => !kind ? "" : (url && kind==="maker"
 const STD_HE = {"R129":"R129 (i-Size)"};
 const FOLD_HE = {book:"ספר", "3d":"תלת-ממדי", umbrella:"מטרייה"};
 
-const S = {step:1, aio:false, need:null, types:new Set(), stage:null, reqs:new Set(), max:null, stock:true, noprice:true, sort:"low", clubs:new Set()};
+const S = {step:1, aio:false, need:null, types:new Set(), stage:null, reqs:new Set(), max:null, stock:true, noprice:true, sort:"mix", clubs:new Set(), filtersOpen:false};
 
 function poolNeed(){ return ITEMS.filter(i=>i.c===S.need); }
 function filtered(opts){
@@ -742,13 +752,29 @@ function renderRefine(){
     html += `<div><div class="lbl">סוג כסא</div><div class="opt-row small"><button class="opt" type="button" data-aio="" aria-pressed="${!S.aio}">הכל</button><button class="opt" type="button" data-aio="1" aria-pressed="${!!S.aio}">All in One בלבד</button></div></div>`;
   $("#refine").innerHTML = html;
 }
+// default order: Cybex first (owner's choice, not paid; a paid spot would be marked "ממומן"), then brands
+// interleaved, in an order shuffled once per page load (stable while the user changes filters)
+const MIX_SEED = Math.floor(Math.random()*1e9);
+function mixHash(s){ let h=MIX_SEED>>>0; for(const ch of String(s)) h=Math.imul(h^ch.charCodeAt(0),2654435761)>>>0; return h; }
+const CYBEX_TOP = 6;
+const isCybex = g => g.offers.some(o=>(o.b||"").toLowerCase()==="cybex");
+function mixOrder(gs){
+  const key=g=>mixHash(g.rep.fm||g.rep.n), byBrand=new Map();
+  [...gs].sort((a,b)=>key(a)-key(b)).forEach(g=>{ const b=(g.rep.b||"?").toLowerCase(); if(!byBrand.has(b)) byBrand.set(b,[]); byBrand.get(b).push(g); });
+  const rank=new Map(); byBrand.forEach((l,b)=>l.forEach((g,k)=>rank.set(g,[k,mixHash(b)])));
+  // the first CYBEX_TOP Cybex models open the list; the rest of Cybex joins the brand mix
+  const top=new Set([...gs].filter(isCybex).sort((a,b)=>key(a)-key(b)).slice(0,CYBEX_TOP));
+  return g=>[top.has(g)?0:1, rank.get(g)[0], rank.get(g)[1]];
+}
 function renderResults(){
   const {list, hiddenUnknown} = filtered();
   const aioLast = S.need==="carseat" && S.stage && S.stage!=="infant";
   const sv = g => Math.max(...g.offers.map(saving));
-  const sorted = groups(list).sort((A,B)=>{
+  const gs = groups(list), mk = S.sort==="mix" ? mixOrder(gs) : null;
+  const sorted = gs.sort((A,B)=>{
     const a=A.rep, b=B.rep;
     if(aioLast){ const d = isAIO(a)-isAIO(b); if(d) return d; }  // age-specific seats first, All in One at the end
+    if(mk){ const x=mk(A), y=mk(B); return x[0]-y[0] || x[1]-y[1] || x[2]-y[2]; }
     if(S.sort==="name") return a.n.localeCompare(b.n,"he");
     if(S.sort==="save") return sv(B)-sv(A);
     if(a.p==null && b.p==null) return 0; if(a.p==null) return 1; if(b.p==null) return -1;
@@ -757,6 +783,11 @@ function renderResults(){
   $("#resTitle").textContent = S.need==="carseat" ? "מושבי בטיחות שמתאימים לכם" : "עגלות שמתאימות לכם";
   $("#resCount").textContent = `${nf.format(sorted.length)} דגמים · אותו דגם אצל כמה מוכרים מופיע בכרטיס אחד`;
   $("#sortSel").value = S.sort;
+  const nF = S.types.size + (S.stage?1:0) + S.clubs.size + (S.aio?1:0);
+  $("#filterCount").textContent = nF ? String(nF) : "";
+  $("#filterBtn").setAttribute("aria-label", nF ? `סינון, ${nF} מסננים פעילים` : "סינון");
+  $("#filterBtn").setAttribute("aria-expanded", String(S.filtersOpen));
+  $("#refine").hidden = !S.filtersOpen;
   $("#seatDisc").hidden = S.need!=="carseat";
   renderRefine();
   CARDS.length=0;
@@ -785,7 +816,7 @@ function renderBar(){
 }
 
 /* ---------- events ---------- */
-function reset(){ S.clubs.clear(); S.need=null; S.types.clear(); S.stage=null; S.reqs.clear(); S.max=null; S.aio=false; S.noprice=true; S.sort="low"; }
+function reset(){ S.clubs.clear(); S.need=null; S.types.clear(); S.stage=null; S.reqs.clear(); S.max=null; S.aio=false; S.noprice=true; S.sort="mix"; S.filtersOpen=false; }
 document.addEventListener("click", e=>{
   const b=e.target.closest("button"); if(!b || b.closest("#a11yPanel")) return;
   if(b.dataset.info){ openInfo(b.dataset.info, b); return; }
@@ -808,6 +839,7 @@ $("#infoDlg").addEventListener("cancel", e=>{ e.preventDefault(); closeInfo(); }
 $("#infoDlg").addEventListener("click", e=>{ if(e.target.id==="infoDlg") closeInfo(); });   // click on the backdrop
 $("#nextBtn").addEventListener("click",()=>go(S.step+1));
 $("#backBtn").addEventListener("click",()=>go(S.step-1));
+$("#filterBtn").addEventListener("click",()=>{ S.filtersOpen=!S.filtersOpen; $("#filterBtn").setAttribute("aria-expanded",String(S.filtersOpen)); $("#refine").hidden=!S.filtersOpen; });
 $("#sortSel").addEventListener("change",e=>{ S.sort=e.target.value; renderResults(); });
 $("#maxPrice").addEventListener("input",e=>{ S.max=+e.target.value; updateMaxOut(); renderBar(); });
 $("#noPrice").addEventListener("change",e=>{ S.noprice=e.target.checked; renderBar(); });
