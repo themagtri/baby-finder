@@ -192,6 +192,10 @@ table.cmp th,table.cmp td{border-bottom:1px solid var(--line);padding:9px 10px;t
 table.cmp thead th{font-weight:700;position:relative;padding-inline-end:34px}
 table.cmp .rh{position:sticky;inset-inline-start:0;background:var(--paper);min-width:96px;font-weight:600;color:var(--muted)}
 table.cmp tr.diff td{background:#f8ece5;font-weight:600}
+.vdet summary{cursor:pointer;color:var(--navy);text-decoration:underline;text-underline-offset:3px;min-height:32px}
+.vchips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.vchip{display:inline-block;border:1px solid var(--line-strong);border-radius:999px;padding:2px 8px;font-size:.78rem;font-weight:500;background:var(--paper)}
+.vchip.uniq{background:#dcefd2;border-color:#7fb069;color:#1f4d14;font-weight:700}
 table.cmp .cb,.fav-list .cb{display:block;font-size:.72rem;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
 .unk{color:var(--muted);font-weight:400}
 .cmp-x{position:absolute;top:6px;inset-inline-end:4px;width:28px;height:28px;border-radius:50%;border:1px solid var(--line-strong);background:var(--paper);cursor:pointer;line-height:1}
@@ -882,11 +886,21 @@ const dlgOpener={};
 function showDlg(id, opener){ dlgOpener[id]=opener; const d=$("#"+id); if(d.showModal) d.showModal(); else d.setAttribute("open",""); d.querySelector(".dlg-x").focus(); }
 function closeDlg(id){ const d=$("#"+id); if(d.open) d.close(); const o=dlgOpener[id]; if(o && document.contains(o)) o.focus(); }
 const unk='<span class="unk">לא צוין</span>';
+// vouchers in the compare table: only the ones the user picked; with none picked, a closed list.
+// A voucher that only some of the compared models take is marked green.
+let CMP_COMMON=new Set();
+const gV = g => { const m=new Map(); g.offers.forEach(o=>vOf(o.s).forEach(c=>{ if(!m.has(c.n)) m.set(c.n,c); })); return sortV([...m.values()]); };
+function cmpVouchers(g){
+  const vs=gV(g), chip=c=>`<span class="vchip${CMP_COMMON.has(c.n)?"":" uniq"}">${esc(c.n)}${CMP_COMMON.has(c.n)?"":'<span class="sr-only"> (רק בחלק מהדגמים)</span>'}</span>`;
+  if(!vs.length) return "—";
+  if(S.clubs.size){ const l=vs.filter(c=>S.clubs.has(c.n)); return l.length? l.map(c=>"✓ "+chip(c)).join(" ") : '<span class="unk">לא מקבלים את התווים שבחרתם</span>'; }
+  return `<details class="vdet"><summary>${vs.length} תווים</summary><div class="vchips">${vs.map(chip).join("")}</div></details>`;
+}
 function cmpRows(c){
   const R=[["המחיר הכי זול", g=>shekel(g.rep.p)],
            ["מוכרים", g=>g.offers.map(o=>esc(o.sn)+" "+shekel(o.p)).join("<br>")],
            ["הנחה במבצע", g=>{ const s=Math.max(...g.offers.map(saving)); return s? "עד "+shekel(s)+" לפי המוכר" : "—"; }],
-           ["תווי קנייה", g=>{ const v=[...new Set(g.offers.flatMap(o=>vouchers(o)))]; return v.length? v.map(esc).join(", ") : "—"; }]];
+           ["תווי קנייה", cmpVouchers]];
   if(c==="stroller") R.push(
     ["סוג", g=>{ const t=TYPES.find(t=>t.k===g.rep.t); return t? t.he : unk; }],
     ["גיל", g=>{ const i=g.rep; return (i.a0!=null && i.a1!=null)? `${fmtAge(i.a0)} עד ${fmtAge(i.a1)}` : unk; }],
@@ -908,6 +922,8 @@ function renderCmp(){
   const box=$("#cmpBody");
   if(!gs.length){ box.innerHTML='<p class="dlg-note">אין עדיין דגמים בהשוואה. לחצו "הוספה להשוואה" בכרטיס.</p>'; return; }
   const only=$("#cmpOnly").checked;
+  const sets=gs.map(g=>new Set(gV(g).map(c=>c.n)));
+  CMP_COMMON=new Set([...sets[0]].filter(n=>sets.every(s=>s.has(n))));
   const head=`<tr><th scope="col" class="rh"><span class="sr-only">נתון</span></th>${gs.map(g=>`<th scope="col"><span class="cb">${esc(g.rep.b||"")}</span>${esc(title(g.rep))}
       <button class="cmp-x" type="button" data-cmp="${esc(g.key)}" aria-label="הסרה מההשוואה: ${esc(title(g.rep))}">×</button></th>`).join("")}</tr>`;
   const rows=cmpRows(gs[0].rep.c).map(([lbl,f])=>{ const v=gs.map(f), diff=new Set(v).size>1;
@@ -915,7 +931,7 @@ function renderCmp(){
     return `<tr class="${diff?"diff":""}"><th scope="row" class="rh">${lbl}</th>${v.map(x=>`<td>${x}</td>`).join("")}</tr>`; }).join("");
   const go=`<tr><th scope="row" class="rh"><span class="sr-only">קישור</span></th>${gs.map(g=>`<td><button class="btn go sm" type="button" data-leavek="${esc(g.key)}">למוכר<span aria-hidden="true"> ↗</span></button></td>`).join("")}</tr>`;
   box.innerHTML=`<div class="cmp-scroll"><table class="cmp"><caption class="sr-only">השוואה בין ${gs.length} דגמים</caption><thead>${head}</thead><tbody>${rows}${go}</tbody></table></div>
-    ${gs.length<2? '<p class="dlg-note">הוסיפו עוד דגם כדי לראות את ההבדלים.</p>' : '<p class="dlg-note">שורה מודגשת = יש הבדל בין הדגמים. הנתונים כפי שהמוכר כתב.</p>'}`;
+    ${gs.length<2? '<p class="dlg-note">הוסיפו עוד דגם כדי לראות את ההבדלים.</p>' : '<p class="dlg-note">שורה מודגשת = יש הבדל בין הדגמים. תו בירוק = מתקבל רק בחלק מהדגמים. הנתונים כפי שהמוכר כתב.</p>'}`;
 }
 function openCmp(opener){ renderCmp(); showDlg("cmpDlg", opener); }
 function renderFav(){
