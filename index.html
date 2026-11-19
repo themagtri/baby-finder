@@ -756,7 +756,7 @@ function renderRefine(){
 // interleaved, in an order shuffled once per page load (stable while the user changes filters)
 const MIX_SEED = Math.floor(Math.random()*1e9);
 function mixHash(s){ let h=MIX_SEED>>>0; for(const ch of String(s)) h=Math.imul(h^ch.charCodeAt(0),2654435761)>>>0; return h; }
-const CYBEX_TOP = 6;
+const CYBEX_TOP = 1;
 const isCybex = g => g.offers.some(o=>(o.b||"").toLowerCase()==="cybex");
 function mixOrder(gs){
   const key=g=>mixHash(g.rep.fm||g.rep.n), byBrand=new Map();
