@@ -200,6 +200,9 @@ section.screen.on{display:block;animation:fade .35s ease}
 .offer small{color:var(--muted);font-weight:400}
 .offer .oc{display:block;font-size:.72rem;color:var(--muted);font-weight:400}
 .offer.best .op{font-weight:700}
+.vnote{background:var(--blush);border-radius:12px;padding:8px 12px;font-size:.82rem;line-height:1.5}
+.vnote p{margin:0 0 4px;font-weight:600}
+.vnote ul{margin:0;padding-inline-start:18px}
 .dlg-x{position:absolute;top:12px;inset-inline-end:12px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line-strong);
   background:transparent;font-size:1.3rem;line-height:1;cursor:pointer}
 .dlg-video{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000;margin:6px 0 10px}
@@ -636,7 +639,8 @@ function groups(list){
   return [...by.values()].map(g=>{
     const best={};   // cheapest offer per seller (Super-Pharm cards name the store that actually sells)
     g.forEach(i=>{ const s=i.sn; if(!best[s] || (i.p!=null && (best[s].p==null || i.p<best[s].p))) best[s]=i; });
-    const offers=Object.values(best).sort((a,b)=>(a.p??1e9)-(b.p??1e9));
+    const nv = o => (CLUBS[o.s]||[]).filter(c=>c.k==="voucher").length;
+    const offers=Object.values(best).sort((a,b)=>((a.p??1e9)-(b.p??1e9)) || (nv(b)-nv(a)));   // same price: the store that takes vouchers first
     return {rep:offers[0], offers};
   });
 }
@@ -645,6 +649,21 @@ function offerRow(o, first){
   const cl=(CLUBS[o.s]||[]).filter(c=>c.k==="voucher").map(c=>esc(c.n)+(c.on===0?" (בחנויות)":"")).join(" · ");
   return `<li class="offer${first?" best":""}"><span><span class="os">${esc(o.sn)}</span>${cl? `<span class="oc">תווים: ${cl}</span>`:""}</span>
     <span class="op">${o.p!=null? shekel(o.p) : "מחיר לא מופיע"}${o.pn? ` <small>(${esc(o.pn)})</small>`:""}</span></li>`;
+}
+// owner, 19.11.2026: when the cheapest store does not take a voucher that another store on the card takes, say where it is accepted
+const vouchers = o => (CLUBS[o.s]||[]).filter(c=>c.k==="voucher").map(c=>c.n);
+function voucherNote(g){
+  if(g.offers.length<2 || S.clubs.size) return "";       // with a voucher filter every store on the card takes it
+  const first=new Set(vouchers(g.offers[0])), at=new Map();
+  for(const o of g.offers.slice(1)) for(const v of vouchers(o)){
+    if(first.has(v)) continue;
+    if(!at.has(o)) at.set(o,[]);
+    if(![...at.values()].some(l=>l.includes(v))) at.get(o).push(v);   // each voucher at its cheapest store only
+  }
+  const rows=[...at.entries()].filter(([,l])=>l.length);
+  if(!rows.length) return "";
+  const head = first.size ? `חלק מהתווים לא מתקבלים אצל ${esc(g.offers[0].sn)}, שמוכר הכי זול. אפשר לשלם בהם אצל:` : `אצל ${esc(g.offers[0].sn)}, שמוכר הכי זול, לא משלמים בתווים. אפשר לשלם בתו אצל:`;
+  return `<div class="vnote"><p>${head}</p><ul>${rows.map(([o,l])=>`<li><b>${esc(o.sn)}</b> · ${o.p!=null? shekel(o.p):""} · ${l.map(esc).join(", ")}</li>`).join("")}</ul></div>`;
 }
 const CARDS=[];   // rendered groups, for the leave dialog
 function card(g, idx){
@@ -659,7 +678,7 @@ function card(g, idx){
     ? `<div class="price">${n>1? `<span class="pn">הכי זול מבין ${n} מוכרים</span>`:""}<span class="now">${shekel(i.p)}</span>${n===1&&i.pr? `<s><span class="sr-only">מחיר רגיל </span>${shekel(i.pr)}</s>`:""}${n===1&&i.pn? `<span class="pn">${esc(i.pn)}</span>`:""}</div>`
     : `<div class="price none">המחיר לא מופיע באתר המוכר</div>`;
   const offers = n>1
-    ? `<ul class="offers" aria-label="המחיר אצל כל מוכר"><li class="offers-h" aria-hidden="true">המחיר אצל כל מוכר</li>${g.offers.map((o,k)=>offerRow(o,k===0)).join("")}</ul>`
+    ? `<ul class="offers" aria-label="המחיר אצל כל מוכר"><li class="offers-h" aria-hidden="true">המחיר אצל כל מוכר</li>${g.offers.map((o,k)=>offerRow(o,k===0)).join("")}</ul>${voucherNote(g)}`
     : `${clubTags(i)}<div class="seller"><span>נמכר ב: <b>${esc(i.sn)}</b></span></div>`;
   CARDS[idx]=g;
   const sub = n>1 ? (i.d||"").replace(/מגוון צבעים \(\d+\)/, "מגוון צבעים") : i.d;   // the colour count belongs to one seller

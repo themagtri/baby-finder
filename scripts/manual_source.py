@@ -30,6 +30,13 @@ CYBEX = [
     (r"Sirona T|סירונה T|סירונה טי", "Cybex Sirona T i-Size", "carseat", "convertible", "R129"),
     (r"Anoris T2|אנוריס", "Cybex Anoris T2 i-Size Plus", "carseat", "toddler", "R129"),
     (r"Solution T|סולושן T|סולושן טי", "Cybex Solution T i-Fix", "carseat", "booster", ""),
+    (r"Solution B|סולושן B", "Cybex Solution B i-Fix", "carseat", "booster", ""),
+    (r"Solution G2|סולושן G2", "Cybex Solution G2", "carseat", "booster", ""),
+    (r"Pallas G3", "Cybex Pallas G3", "carseat", "toddler", ""),
+    (r"Sirona Gi|סירונה Gi", "Cybex Sirona Gi", "carseat", "convertible", ""),
+    (r"Cloud G|קלאוד G", "Cybex Cloud G", "carseat", "infant", ""),
+    (r"Aton B2|אטון B2", "Cybex Aton B2", "carseat", "infant", ""),
+    (r"Gazelle S|גאזל", "Cybex Gazelle S", "stroller", "twin", ""),
 ]
 FRAMES = [("רוזגולד", "שלדת רוזגולד"), ("מט שחור", "שלדה שחור מט"), ("חום כרום", "שלדת כרום חום"),
           ("שחור כרום", "שלדת כרום שחור"), ("כסופה", "שלדה כסופה")]

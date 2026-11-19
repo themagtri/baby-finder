@@ -149,4 +149,11 @@ python -I scripts/site_data.py
   - הכפתור פותח חלון "אתם עומדים לצאת מהאתר" עם כפתור לכל מוכר (שם ומחיר), כמו באתר האופניים.
   - נוספו שמות דגמים ל-`scripts/models.py`: Joolz, Peg Perego, UPPAbaby, Anex, Silver Cross, Kikkaboo, Graco, Baby Jogger, Kinderkraft, ועוד דגמי Bugaboo ו-Sport Line.
   - איחוד צבעים: מילים אחרי "צבע" לא נחשבות לשם הדגם (Joolz Aer+ בארבעה צבעים = כרטיס אחד).
+- **תווים בכרטיס המאוחד (19.11.2026, לבקשת הבעלים):**
+  - פילטר תו מציג בכרטיס רק מוכרים שמקבלים אותו.
+  - בלי פילטר: אם המוכר הזול לא מקבל תו שמוכר אחר בכרטיס מקבל, מופיע "אפשר לשלם בתו אצל..." עם המוכר, המחיר והתווים.
+  - במחיר שווה, מוכר שמקבל תווים מופיע ראשון.
+- **עוד שמות דגמים:** 79 דגמים מאוחדים בין מוכרים (קודם 54). נוספו Babysafe, BeSafe, Graco, Sport Line (i-Happy, Flex, I-Protec), Chicco, Britax ו-Cybex (Solution, Cloud G, Gazelle S ועוד).
+  - הופרדו דגמים שונים עם שם דומה: Donkey 5 Duo / Twins / Mono, Turn2Me / Turn2Me Grow, Nautilus Elite / SnugLock LX.
+  - מותג שחסר בשם נקבע לפי שם דגם ייחודי (`MODEL_BRAND`).
 

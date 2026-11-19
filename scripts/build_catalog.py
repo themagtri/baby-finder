@@ -370,6 +370,10 @@ def main():
     ovs = overrides()
     rows = from_woo("besafe", "BeSafe", ovs) + from_woo("segal", "Stokke", ovs) + \
         from_woo("babyjogger", "Baby Jogger", ovs) + from_joie() + from_manual(base) + from_superpharm()
+    from models import brand_from_model
+    for r in rows:
+        if not r["brand"] and r["cat"] == "carseat":
+            r["brand"] = brand_from_model(r["model"])
     conflicts = name_facts(rows)
     for r in rows:
         r["family"] = family(r)
