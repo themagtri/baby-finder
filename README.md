@@ -157,3 +157,6 @@ python -I scripts/site_data.py
   - הופרדו דגמים שונים עם שם דומה: Donkey 5 Duo / Twins / Mono, Turn2Me / Turn2Me Grow, Nautilus Elite / SnugLock LX.
   - מותג שחסר בשם נקבע לפי שם דגם ייחודי (`MODEL_BRAND`).
 
+- **GitHub Pages הופעל (19.11.2026, לבקשת הבעלים, לצפייה בנייד):** https://themagtri.github.io/baby-finder/
+  - כל הדפים עם `noindex, nofollow` עד ההשקה, כדי שמנועי חיפוש לא יאנדקסו. אין עדיין סטטיסטיקה או פיקסל.
+  - הטקסטים המשפטיים עדיין טיוטה לעורך דין.
