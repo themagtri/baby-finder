@@ -21,7 +21,7 @@ FIELDS = ["cat", "type", "seat_group", "brand", "model", "subtitle", "seller", "
 
 SELLER_NAME = {"besafe": "BeSafe ישראל", "segal": "סגל בייבי", "babyjogger": "Baby Jogger ישראל", "joie": "Joie ישראל",
                "cybex": "Cybex ישראל", "chicco": "Chicco ישראל",
-               "shilav": "שילב", "babystar": "בייבי סטאר", "motzetzim": "מוצצים", "agalease": "עגליס", "minena": "מיננה"}
+               "shilav": "שילב", "babystar": "בייבי סטאר", "motzetzim": "מוצצים", "agalease": "עגליס", "minena": "מיננה", "balibaby": "בא לי בייבי"}
 
 
 def clean(s):

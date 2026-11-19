@@ -637,7 +637,7 @@ function card(i, idx){
       ${compare(i)}
       ${clubTags(i)}
       <div class="seller"><span>נמכר ב: <b>${esc(i.sn)}</b></span></div>
-      <a class="btn go" href="${esc(i.u)}" target="_blank" rel="noopener nofollow" data-out="${esc(i.s)}">לדף המוצר אצל המוכר<span class="sr-only"> (נפתח בחלון חדש)</span><span aria-hidden="true">↗</span></a>
+      <a class="btn go" href="${esc(i.u)}" target="_blank" rel="noopener nofollow" data-out="${esc(i.s)}">${/^https?:\/\/[^/]+\/?$/.test(i.u||"") ? "לאתר החנות (חפשו את הדגם)" : "לדף המוצר אצל המוכר"}<span class="sr-only"> (נפתח בחלון חדש)</span><span aria-hidden="true">↗</span></a>
     </div>
   </article>`;
 }

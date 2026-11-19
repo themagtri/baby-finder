@@ -303,6 +303,28 @@ def chain_file_rows(seller, prods, base, url_name=True):
     return rows
 
 
+def balibaby_rows(base):
+    """Bali Baby blocks automated access (bot check). The owner screen-recorded its category pages; each row of
+    data/manual_balibaby.csv is one listing read by eye from a frame of those videos / screenshots (source column).
+    The recordings carry no product links, so the card links to the store's home page (the site says so)."""
+    import csv
+    p = ROOT / "data" / "manual_balibaby.csv"
+    if not p.exists():
+        return []
+    rows = []
+    with open(p, encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            price, reg = float(r["price"]), (float(r["price_reg"]) if r["price_reg"] else None)
+            if reg is not None and reg <= price: reg = None  # struck price not above the price: no saving shown
+            kw = dict(cat=r["cat"], brand=r["brand"], model=r["name"], subtitle=SUB.get(r["kind"], ""), price=n(price),
+                      price_reg=n(reg), price_note="מחיר מבצע" if reg else "", in_stock=1,
+                      url="https://www.balibaby.co.il/", source_id=r["source"])
+            if r["cat"] == "stroller": kw["type"] = r["kind"]
+            else: kw["seat_group"] = r["kind"]
+            rows.append(base("balibaby", "2026-11-18", **kw))
+    return rows
+
+
 def from_manual(base_fn):
     p = ROOT / "data" / "raw" / "manual.json"
     if not p.exists():
@@ -317,4 +339,5 @@ def from_manual(base_fn):
     rows += chain_file_rows("agalease", [x for x in prods if x["seller"] == "agalease"], b, url_name=False)
     rows += chain_file_rows("babystar", [x for x in prods if x["seller"] == "babystar"], b, url_name=False)
     rows += chain_rows("minena", [x for x in prods if x["seller"] == "minena"], b)
+    rows += balibaby_rows(base_fn)
     return rows
