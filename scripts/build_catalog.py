@@ -21,7 +21,7 @@ FIELDS = ["cat", "type", "seat_group", "brand", "model", "subtitle", "seller", "
 
 SELLER_NAME = {"besafe": "BeSafe ישראל", "segal": "סגל בייבי", "babyjogger": "Baby Jogger ישראל", "joie": "Joie ישראל",
                "cybex": "Cybex ישראל", "chicco": "Chicco ישראל",
-               "shilav": "שילב", "babystar": "בייבי סטאר", "motzetzim": "מוצצים", "agalease": "עגליס", "minena": "מיננה", "balibaby": "בא לי בייבי"}
+               "shilav": "שילב", "babystar": "בייבי סטאר", "motzetzim": "מוצצים", "agalease": "עגליס", "minena": "מיננה", "balibaby": "בא לי בייבי", "ksp": "KSP", "superpharm": "סופר-פארם"}
 
 
 def clean(s):
@@ -335,7 +335,8 @@ def merge_colours(rows):
         if r["family"]:
             return r["family"]
         drop = GENERIC | {w.lower() for w in r["brand"].split()} | set(r["brand"].lower().split())
-        toks = [t for t in re.split(r"[\s/–\-]+", r["model"].lower().replace("™", "")) if t and t not in drop]
+        m = re.split(r"\bצבע\b|\bבצבע\b", r["model"].lower().replace("™", ""))[0]  # colour words follow 'צבע'
+        toks = [t for t in re.split(r"[\s/–\-]+", m) if t and t not in drop]
         toks = [t for t in toks if t not in {"צ'יקו", "סייבקס", "בוגבו", "ג'ואי", "גוי", "נונה", "ברייטקס", "טוויגי"}]
         return " ".join(toks[:2])
     def ncol(r):
@@ -343,7 +344,7 @@ def merge_colours(rows):
         return int(m.group(1)) if m else 1
     groups = {}
     for r in rows:
-        key = (r["seller"], r["brand"], r["cat"], r["type"] or r["seat_group"], r["price"], r["price_reg"], core(r))
+        key = (r["seller"], r["seller_name"], r["brand"], r["cat"], r["type"] or r["seat_group"], r["price"], r["price_reg"], core(r))
         groups.setdefault(key, []).append(r)
     out = []
     for g in groups.values():

@@ -136,8 +136,93 @@ def parse_cards(doc, path):
     return out
 
 
+def card_lines(doc, match, area_of):
+    """Join every link piece of one product URL per page; read the card's lines (RTL order) from area_of(rect, page)."""
+    sys.path.insert(0, str(pathlib.Path(__file__).parent))
+    from rtl_text import lines_in
+    cards = {}
+    for page in doc:
+        per = {}
+        for l in page.get_links():
+            u = (l.get("uri") or "").split("?")[0]
+            if match(u): per.setdefault(u, []).append(fitz.Rect(l["from"]))
+        for u, rs in per.items():
+            r = rs[0]
+            for x in rs[1:]: r |= x
+            ls = cards.setdefault(u, [])
+            for ln in lines_in(page, area_of(r, page)):
+                ln = " ".join(ln.split())
+                if ln and ln not in ls: ls.append(ln)
+    return cards
+
+
+def parse_ksp(doc, path):
+    """KSP category PDF. Card: 'מק"ט KSP', name lines, then prices: struck regular, struck Eilat price, KSP price,
+    'אילת: ₪x' (VAT-free Eilat price, ignored). Price = the last price before the Eilat line."""
+    cards = card_lines(doc, lambda u: "ksp.co.il/web/item/" in u,
+                       lambda r, page: fitz.Rect(r.x0 - 5, r.y0, r.x1 + 5, min(r.y1 + 260, page.rect.y1)))
+    out = []
+    for u, ls in cards.items():
+        i = next((k for k, l in enumerate(ls) if "KSP" in l and "ט" in l), None)
+        if i is None: continue
+        name = []
+        for l in ls[i + 1:]:
+            if "₪" in l: break
+            name.append(l)
+        vals, eilat = [], False
+        for l in ls[i + 1:]:
+            if "אילת" in l: eilat = True; break
+            vals += [money(v) for v in re.findall(r"₪\s*" + NUM, l)]
+        if not name or not vals: continue
+        it = {"seller": "ksp", "name": " ".join(name), "url": u, "source_file": path.name}
+        if len(vals) >= 2 and vals[0] > vals[-1]: it["regular"], it["sale"] = vals[0], vals[-1]
+        else: it["regular"] = vals[-1]
+        text = "\n".join(ls)
+        if re.search(r"אזל|לא במלאי|אין במלאי", text): it["oos"] = True
+        if re.search(r"יבואן רשמי|יבוא רשמי", text): it["import"] = "official"
+        elif "יבוא מקביל" in text: it["import"] = "parallel"
+        out.append(it)
+    return out
+
+
+def parse_superpharm(doc, path):
+    """Super-Pharm category PDF (a marketplace). Name from the product URL (the card title is cut with '...').
+    Card: price ('החל מ' = lowest of several offers), struck price, 'נמכר ע״י X' (the actual seller) or
+    'מוכר חיצוני' + 'להצעות נוספות' (several outside sellers, not named), 'יבוא רשמי' when printed."""
+    cards = card_lines(doc, lambda u: "/infants-and-toddlers/car-seats/" in u and "/p/" in u,
+                       lambda r, page: fitz.Rect(r.x0 - 5, r.y0, r.x1 + 5, min(r.y1 + 24, page.rect.y1)))
+    out = []
+    for u, ls in cards.items():
+        slug = urllib.parse.unquote(u.split("/p/")[0].rstrip("/").split("/")[-1])
+        name = slug.replace("-", " ").strip()
+        sub = u.split("/car-seats/")[1].split("/")[0]
+        it = {"seller": "superpharm", "name": name, "url": u, "source_file": path.name, "sp_cat": sub}
+        joined = []
+        for l in ls:  # superscript agorot: '₪56' then '90' on its own line
+            if joined and re.fullmatch(r"\d{2}", l) and re.search(r"₪\s*\d+$", joined[-1]): joined[-1] += "." + l
+            else: joined.append(l)
+        text = "\n".join(joined)
+        vals = [money(v) for v in re.findall(r"₪\s*" + NUM, text) if money(v) >= 10]
+        if not vals: continue
+        if len(vals) >= 2 and max(vals[:2]) > min(vals[:2]): it["regular"], it["sale"] = max(vals[:2]), min(vals[:2])
+        else: it["regular"] = vals[0]
+        if "החל מ" in text: it["from"] = True
+        m = re.search(r"נמכר ע\s*[״\"']\s*י\s+(.+)", text)
+        if m: it["vendor"] = m.group(1).strip()
+        elif "מוכר חיצוני" in text: it["vendor"] = ""
+        if re.search(r"אזל|לא במלאי|אין במלאי", text): it["oos"] = True
+        if "יבוא רשמי" in text: it["import"] = "official"
+        elif "יבוא מקביל" in text: it["import"] = "parallel"
+        out.append(it)
+    return out
+
+
 def parse_pdf(path):
     doc = fitz.open(path)
+    if "KSP" in path.name:
+        return parse_ksp(doc, path)
+    if "סופר-פארם" in path.name:
+        return parse_superpharm(doc, path)
     if "shilav" in path.name.lower():
         return parse_shilav(doc, path)
     if re.search(r"עגליס|בייביסטאר|מוצצים", path.name):

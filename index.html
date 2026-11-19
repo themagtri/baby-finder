@@ -176,12 +176,30 @@ section.screen.on{display:block;animation:fade .35s ease}
 .info-btn{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--navy);background:var(--paper);color:var(--navy);
   font:italic 700 .72rem/1 Georgia,serif;cursor:pointer;display:inline-grid;place-items:center;padding:0;flex:none}
 .info-btn:hover{background:var(--navy);color:#fff}
-#infoDlg{border:0;border-radius:20px;padding:22px 20px 18px;width:min(440px,calc(100vw - 32px));max-height:85vh;overflow:auto;
+#infoDlg,#leaveDlg{border:0;border-radius:20px;padding:22px 20px 18px;width:min(440px,calc(100vw - 32px));max-height:85vh;overflow:auto;
   background:var(--paper);color:var(--ink);box-shadow:0 20px 60px rgba(10,10,10,.3)}
-#infoDlg::backdrop{background:rgba(10,10,10,.45)}
+#infoDlg::backdrop,#leaveDlg::backdrop{background:rgba(10,10,10,.45)}
 #infoDlg h2{margin:0 0 10px;font-size:1.15rem;padding-inline-end:36px}
 #infoDlg p{margin:0 0 10px;font-size:.94rem;line-height:1.6}
 .dlg-note{color:var(--muted);font-size:.82rem!important}
+.leave-eyebrow{font-size:.85rem!important;color:var(--muted);margin:2px 0 12px!important;padding-inline-end:36px;font-weight:400}
+.leave-what{background:var(--bg,#f9f5f2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-weight:600;line-height:1.35}
+.leave-what small{display:block;color:var(--muted);font-weight:400;font-size:.82rem;margin-top:4px}
+#leaveDlg .dlg-note{margin:10px 0 0}
+.leave-list{display:grid;gap:8px;margin-top:12px}
+.leave-go{display:flex;align-items:center;justify-content:space-between;gap:10px;text-decoration:none;background:var(--sky);color:var(--navy);
+  border-radius:14px;padding:12px 14px;min-height:48px;font-weight:600}
+.leave-go:hover{background:#9bb9e1}
+.leave-go .lp{font-size:1.05rem;white-space:nowrap}
+.leave-go small{display:block;font-weight:400;font-size:.76rem;color:var(--ink)}
+.offers{list-style:none;margin:0;border:1px solid var(--line);border-radius:14px;padding:4px 10px;display:grid}
+.offers-h{font-size:.75rem;font-weight:700;color:var(--muted);padding:4px 0}
+.offer{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:7px 0;border-top:1px solid var(--line);font-size:.9rem}
+.offer .os{font-weight:600}
+.offer .op{white-space:nowrap}
+.offer small{color:var(--muted);font-weight:400}
+.offer .oc{display:block;font-size:.72rem;color:var(--muted);font-weight:400}
+.offer.best .op{font-weight:700}
 .dlg-x{position:absolute;top:12px;inset-inline-end:12px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line-strong);
   background:transparent;font-size:1.3rem;line-height:1;cursor:pointer}
 .dlg-video{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000;margin:6px 0 10px}
@@ -328,6 +346,14 @@ body.still *{animation:none!important;transition:none!important}
   </footer>
 </div>
 
+<dialog id="leaveDlg" aria-labelledby="leaveTitle">
+  <button class="dlg-x" type="button" id="leaveClose" aria-label="סגירה">×</button>
+  <h2 class="leave-eyebrow" id="leaveTitle">אתם עומדים לצאת מהאתר</h2>
+  <div class="leave-what" id="leaveWhat"></div>
+  <p class="dlg-note">בחרו מוכר. דף המוצר ייפתח בלשונית חדשה. המחיר והמלאי הקובעים הם אלה שבאתר המוכר.</p>
+  <div class="leave-list" id="leaveList"></div>
+</dialog>
+
 <dialog id="infoDlg" aria-labelledby="infoTitle">
   <button class="dlg-x" type="button" id="infoClose" aria-label="סגירה">×</button>
   <h2 id="infoTitle"></h2>
@@ -354,7 +380,8 @@ const CLUB_NAMES = [...new Set(Object.entries(CLUBS).filter(([s])=>SELLERS.has(s
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const nf = new Intl.NumberFormat("he-IL");
-const shekel = n => "₪" + nf.format(n);
+const nf2 = new Intl.NumberFormat("he-IL",{minimumFractionDigits:2, maximumFractionDigits:2});
+const shekel = n => "₪" + (Number.isInteger(n) ? nf.format(n) : nf2.format(n));
 // Unsplash licence photos, illustration only (not the products themselves)
 const IMG = (id,w) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w||800}&q=70`;
 const BG = (id,w) => `background-image:url('${IMG(id,w)}')`;
@@ -552,22 +579,6 @@ function facts(i){
   if(f.length%2) f[f.length-1].push("wide");
   return f.map(([k,v,w])=>`<li${w?' class="wide"':""}><span class="k">${k}${INFO_KEY[k]? `<button class="info-btn" type="button" data-info="${INFO_KEY[k]}" aria-label="מה זה ${k}?">i</button>`:""}</span>${v}</li>`).join("");
 }
-// same model at other sellers (data.js "o": cheapest card of that model at each other seller)
-function compare(i){
-  if(!i.o || !i.o.length) return "";
-  const rows = i.o.map(o=>`<a class="cmp-row" href="${esc(o.u)}" target="_blank" rel="noopener nofollow" data-out="cmp">
-      <span class="cs">${esc(o.sn)}</span>
-      <span class="cp">${o.p!=null? "החל מ-"+shekel(o.p) : "מחיר לא מופיע"}${o.pn? ` <small>(${esc(o.pn)})</small>`:""}${o.st!==1? ' <small class="oo">אזל</small>':""}</span>
-      <span aria-hidden="true">↗</span><span class="sr-only"> (נפתח בחלון חדש)</span></a>`).join("");
-  const cheaper = i.p!=null ? i.o.filter(o=>o.p!=null && o.p<i.p) : [];
-  const same = i.p!=null ? i.o.filter(o=>o.p===i.p) : [];
-  const note = i.p==null ? "" : cheaper.length
-    ? `<span class="cmp-note">נמצא מחיר נמוך יותר אצל ${esc(cheaper[0].sn)}</span>`
-    : same.length
-    ? `<span class="cmp-note">אותו מחיר גם אצל ${esc(same[0].sn)}</span>`
-    : `<span class="cmp-note good">המחיר כאן הוא הנמוך שמצאנו לדגם הזה</span>`;
-  return `<div class="cmp"><div class="cmp-h">אותו דגם אצל מוכרים נוספים ${note}</div>${rows}</div>`;
-}
 // "i" explanations on the card (general facts, not a safety recommendation)
 const INFO_KEY = {"תקן":"std", "ISOFIX":"iso"};
 const INFO = {
@@ -618,29 +629,64 @@ function title(i){
   const t = n.slice(i.b.length).trim();
   return t.length >= 3 ? t : n;
 }
-function card(i, idx){
+// one card per model: every seller's in-stock offer of the same model family (data.js "fm") in one card
+function groups(list){
+  const by=new Map();
+  list.forEach((i,ix)=>{ const k=i.fm? "f:"+i.fm : "x:"+ix; if(!by.has(k)) by.set(k,[]); by.get(k).push(i); });
+  return [...by.values()].map(g=>{
+    const best={};   // cheapest offer per seller (Super-Pharm cards name the store that actually sells)
+    g.forEach(i=>{ const s=i.sn; if(!best[s] || (i.p!=null && (best[s].p==null || i.p<best[s].p))) best[s]=i; });
+    const offers=Object.values(best).sort((a,b)=>(a.p??1e9)-(b.p??1e9));
+    return {rep:offers[0], offers};
+  });
+}
+const homeOnly = u => /^https?:\/\/[^/]+\/?$/.test(u||"");
+function offerRow(o, first){
+  const cl=(CLUBS[o.s]||[]).filter(c=>c.k==="voucher").map(c=>esc(c.n)+(c.on===0?" (בחנויות)":"")).join(" · ");
+  return `<li class="offer${first?" best":""}"><span><span class="os">${esc(o.sn)}</span>${cl? `<span class="oc">תווים: ${cl}</span>`:""}</span>
+    <span class="op">${o.p!=null? shekel(o.p) : "מחיר לא מופיע"}${o.pn? ` <small>(${esc(o.pn)})</small>`:""}</span></li>`;
+}
+const CARDS=[];   // rendered groups, for the leave dialog
+function card(g, idx){
+  const i=g.rep, n=g.offers.length;
   const ik = i.c==="carseat" ? "g_"+(i.g||"toddler") : "t_"+(i.t||"stroller");
-  const sv = saving(i);
   const badges = [
-    i.sp ? '<span class="badge sp">ממומן</span>' : "",
+    g.offers.some(o=>o.sp) ? '<span class="badge sp">ממומן</span>' : "",
     isAIO(i) ? '<span class="badge aio">לכל הגילאים · All in One</span>' : "",
-    i.imp==="official" ? '<span class="badge imp">יבואן רשמי, לפי המוכר</span>' : i.imp==="parallel" ? '<span class="badge imp">יבוא מקביל, לפי המוכר</span>' : "",
-""
+    n===1 && i.imp==="official" ? '<span class="badge imp">יבואן רשמי, לפי המוכר</span>' : n===1 && i.imp==="parallel" ? '<span class="badge imp">יבוא מקביל, לפי המוכר</span>' : "",
   ].join("");
-  const price = i.p!=null ? `<div class="price"><span class="now">${shekel(i.p)}</span>${i.pr? `<s><span class="sr-only">מחיר רגיל </span>${shekel(i.pr)}</s>`:""}${i.pn? `<span class="pn">${esc(i.pn)}</span>`:""}</div>` : `<div class="price none">המחיר לא מופיע באתר המוכר</div>`;
+  const price = i.p!=null
+    ? `<div class="price">${n>1? `<span class="pn">הכי זול מבין ${n} מוכרים</span>`:""}<span class="now">${shekel(i.p)}</span>${n===1&&i.pr? `<s><span class="sr-only">מחיר רגיל </span>${shekel(i.pr)}</s>`:""}${n===1&&i.pn? `<span class="pn">${esc(i.pn)}</span>`:""}</div>`
+    : `<div class="price none">המחיר לא מופיע באתר המוכר</div>`;
+  const offers = n>1
+    ? `<ul class="offers" aria-label="המחיר אצל כל מוכר"><li class="offers-h" aria-hidden="true">המחיר אצל כל מוכר</li>${g.offers.map((o,k)=>offerRow(o,k===0)).join("")}</ul>`
+    : `${clubTags(i)}<div class="seller"><span>נמכר ב: <b>${esc(i.sn)}</b></span></div>`;
+  CARDS[idx]=g;
+  const sub = n>1 ? (i.d||"").replace(/מגוון צבעים \(\d+\)/, "מגוון צבעים") : i.d;   // the colour count belongs to one seller
   return `<article class="item">
     <div class="body">
-      <div class="head">${icon(ik)}<span class="brand">${LOGOS[i.b]? `<img class="logo-img" src="${LOGOS[i.b]}" alt="${esc(i.b)}" loading="lazy">` : i.b ? `<span class="brand-pill">${esc(i.b)}</span>` : ""}</span><h3>${esc(title(i))}</h3>${i.d? `<p class="sub">${esc(i.d)}</p>`:""}</div>
+      <div class="head">${icon(ik)}<span class="brand">${LOGOS[i.b]? `<img class="logo-img" src="${LOGOS[i.b]}" alt="${esc(i.b)}" loading="lazy">` : i.b ? `<span class="brand-pill">${esc(i.b)}</span>` : ""}</span><h3>${esc(title(i))}</h3>${sub? `<p class="sub">${esc(sub)}</p>`:""}</div>
       ${badges? `<div class="badges">${badges}</div>`:""}
       ${price}
       <ul class="kf">${facts(i)}</ul>
-      ${compare(i)}
-      ${clubTags(i)}
-      <div class="seller"><span>נמכר ב: <b>${esc(i.sn)}</b></span></div>
-      <a class="btn go" href="${esc(i.u)}" target="_blank" rel="noopener nofollow" data-out="${esc(i.s)}">${/^https?:\/\/[^/]+\/?$/.test(i.u||"") ? "לאתר החנות (חפשו את הדגם)" : "לדף המוצר אצל המוכר"}<span class="sr-only"> (נפתח בחלון חדש)</span><span aria-hidden="true">↗</span></a>
+      ${offers}
+      <button class="btn go" type="button" data-leave="${idx}">${n===1 && homeOnly(i.u) ? "לאתר החנות" : "לדף המוצר אצל המוכר"}<span aria-hidden="true"> ↗</span></button>
     </div>
   </article>`;
 }
+let leaveOpener=null;
+function openLeave(idx, opener){
+  const g=CARDS[idx]; if(!g) return;
+  leaveOpener=opener;
+  const i=g.rep;
+  $("#leaveWhat").innerHTML = `${i.b? esc(i.b)+" · ":""}${esc(title(i))}<small>${g.offers.length>1? g.offers.length+" מוכרים, מהזול ליקר" : esc(i.sn)}</small>`;
+  $("#leaveList").innerHTML = g.offers.map(o=>`<a class="leave-go" href="${esc(o.u)}" target="_blank" rel="noopener nofollow" data-out="${esc(o.s)}">
+      <span>${esc(o.sn)}${homeOnly(o.u)? "<small>לאתר החנות, חפשו שם את הדגם</small>" : o.pn? `<small>${esc(o.pn)}</small>`:""}</span>
+      <span class="lp">${o.p!=null? shekel(o.p) : "—"} <span aria-hidden="true">↗</span></span><span class="sr-only"> (נפתח בלשונית חדשה)</span></a>`).join("");
+  const d=$("#leaveDlg"); if(d.showModal) d.showModal(); else d.setAttribute("open","");
+  $("#leaveList a").focus();
+}
+function closeLeave(){ const d=$("#leaveDlg"); if(d.open) d.close(); if(leaveOpener) leaveOpener.focus(); }
 function renderRefine(){
   let html="";
   if(S.need==="stroller"){
@@ -659,19 +705,22 @@ function renderRefine(){
 function renderResults(){
   const {list, hiddenUnknown} = filtered();
   const aioLast = S.need==="carseat" && S.stage && S.stage!=="infant";
-  const sorted = list.slice().sort((a,b)=>{
+  const sv = g => Math.max(...g.offers.map(saving));
+  const sorted = groups(list).sort((A,B)=>{
+    const a=A.rep, b=B.rep;
     if(aioLast){ const d = isAIO(a)-isAIO(b); if(d) return d; }  // age-specific seats first, All in One at the end
     if(S.sort==="name") return a.n.localeCompare(b.n,"he");
-    if(S.sort==="save") return saving(b)-saving(a);
+    if(S.sort==="save") return sv(B)-sv(A);
     if(a.p==null && b.p==null) return 0; if(a.p==null) return 1; if(b.p==null) return -1;
     return S.sort==="high" ? b.p-a.p : a.p-b.p;
   });
   $("#resTitle").textContent = S.need==="carseat" ? "מושבי בטיחות שמתאימים לכם" : "עגלות שמתאימות לכם";
-  $("#resCount").textContent = `${nf.format(sorted.length)} תוצאות · כרטיס לכל מוכר`;
+  $("#resCount").textContent = `${nf.format(sorted.length)} דגמים · אותו דגם אצל כמה מוכרים מופיע בכרטיס אחד`;
   $("#sortSel").value = S.sort;
   $("#seatDisc").hidden = S.need!=="carseat";
   renderRefine();
-  $("#grid").innerHTML = sorted.length ? sorted.map((it,ix)=>card(it,ix)).join("") :
+  CARDS.length=0;
+  $("#grid").innerHTML = sorted.length ? sorted.map((g,ix)=>card(g,ix)).join("") :
     `<div class="empty">אין תוצאות לבחירות האלה. נסו להרחיב את התקציב, לכלול מוצרים שאזלו מהמלאי או להסיר דרישה.</div>`;
   $("#hiddenNote").textContent = hiddenUnknown ? `${hiddenUnknown} מושבים נוספים לא מוצגים כי המוכר לא ציין נתון שבחרתם.` : "";
 }
@@ -700,6 +749,7 @@ function reset(){ S.clubs.clear(); S.need=null; S.types.clear(); S.stage=null; S
 document.addEventListener("click", e=>{
   const b=e.target.closest("button"); if(!b || b.closest("#a11yPanel")) return;
   if(b.dataset.info){ openInfo(b.dataset.info, b); return; }
+  if(b.dataset.leave!==undefined){ openLeave(+b.dataset.leave, b); return; }
   if(b.dataset.need){ if(S.need!==b.dataset.need){ reset(); S.need=b.dataset.need; } renderHome(); go(2); return; }
   if(b.dataset.go){ go(+b.dataset.go); return; }
   if(b.classList.contains("restart")){ reset(); renderHome(); go(1); return; }
@@ -711,6 +761,9 @@ document.addEventListener("click", e=>{
 });
 function rerender(){ if(S.step===2) renderPrefs(); if(S.step===4) renderResults(); renderChips(); renderBar(); }
 $("#infoClose").addEventListener("click", closeInfo);
+$("#leaveClose").addEventListener("click", closeLeave);
+$("#leaveDlg").addEventListener("cancel", e=>{ e.preventDefault(); closeLeave(); });
+$("#leaveDlg").addEventListener("click", e=>{ if(e.target.id==="leaveDlg") closeLeave(); else if(e.target.closest(".leave-go")) setTimeout(closeLeave, 0); });
 $("#infoDlg").addEventListener("cancel", e=>{ e.preventDefault(); closeInfo(); });
 $("#infoDlg").addEventListener("click", e=>{ if(e.target.id==="infoDlg") closeInfo(); });   // click on the backdrop
 $("#nextBtn").addEventListener("click",()=>go(S.step+1));

@@ -303,6 +303,50 @@ def chain_file_rows(seller, prods, base, url_name=True):
     return rows
 
 
+def ksp_rows(prods, base):
+    """KSP strollers PDF: type from the product name (the file name mixes strollers and travel strollers)."""
+    rows = []
+    for p in prods:
+        nm = p["name"].replace(" '", "'")
+        if re.search(ACCESSORY_ANY, nm): continue
+        cat, kind = kind_of(nm)
+        if cat != "stroller": continue
+        price, preg, note = price_fields(p)
+        brand = next((b for b in BRAND_WORDS if b.lower() in nm.lower()), "") or brand_of(nm)
+        rows.append(base("ksp", cat=cat, type=kind, brand=brand, model=nm, subtitle=SUB.get(kind, ""), price=n(price),
+                         price_reg=n(preg), price_note=note, in_stock=int(not p.get("oos")), url=p["url"],
+                         source_id=p["source_file"], import_status=p.get("import", "")))
+    return rows
+
+
+SP_KIND = {"booster": "booster", "carrycot": "infant", "car-safety-seat": ""}
+
+
+def superpharm_rows(prods, base):
+    """Super-Pharm is a marketplace: most cards are sold by another store ('נמכר ע״י X') or by several outside
+    sellers ('מוכר חיצוני', price 'החל מ'). The card names Super-Pharm and the actual seller as printed."""
+    rows = []
+    for p in prods:
+        kind = SP_KIND.get(p.get("sp_cat"))
+        if kind is None: continue  # accessories
+        nm = p["name"]
+        if re.search(ACCESSORY_ANY, nm): continue
+        if not kind:
+            ch = next((c for c in CHICCO if c[0].lower() in nm.lower()), None)
+            kind = ch[3] if ch else next((t["seat_group"] for t in TAGS if re.search(t["pattern"], nm, re.I)), "")
+        price, preg, note = price_fields(p)
+        if p.get("from"): note = "החל מ-" + (" · " + note if note else "")
+        v = p.get("vendor")
+        v = re.sub(r"\s*\.\s*", ".", v or "").replace(' " ', '"').replace(" ) ", " (").replace(" ( ", ") ").strip(" -")
+        sname = "סופר-פארם" + (f" (מוכר: {v})" if v else (" (כמה מוכרים חיצוניים)" if p.get("vendor") == "" else ""))
+        brand = next((b for b in BRAND_WORDS if b.lower() in nm.lower()), "") or brand_of(nm)
+        rows.append(base("superpharm", cat="carseat", seat_group=kind, brand=brand, model=nm, subtitle=SUB.get(kind, ""),
+                         seller_name=sname, price=n(price), price_reg=n(preg), price_note=note,
+                         in_stock=int(not p.get("oos")), url=p["url"], source_id=p["source_file"],
+                         import_status=p.get("import", "")))
+    return rows
+
+
 def balibaby_rows(base):
     """Bali Baby blocks automated access (bot check). The owner screen-recorded its category pages; each row of
     data/manual_balibaby.csv is one listing read by eye from a frame of those videos / screenshots (source column).
@@ -340,4 +384,6 @@ def from_manual(base_fn):
     rows += chain_file_rows("babystar", [x for x in prods if x["seller"] == "babystar"], b, url_name=False)
     rows += chain_rows("minena", [x for x in prods if x["seller"] == "minena"], b)
     rows += balibaby_rows(base_fn)
+    rows += ksp_rows([x for x in prods if x["seller"] == "ksp"], b)
+    rows += superpharm_rows([x for x in prods if x["seller"] == "superpharm"], b)
     return rows
