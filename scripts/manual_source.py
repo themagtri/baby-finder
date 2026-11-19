@@ -354,10 +354,18 @@ def superpharm_rows(prods, base):
     return rows
 
 
+def bb_search(name):
+    """No product links in the recordings: link to the store's own search for the model name (colour part dropped).
+    Checked 19.11.2026 in a browser: the search lists exactly that model's listings."""
+    import re, urllib.parse
+    q = re.split(r"\s*(?:צבע|בצבע)\s*:?", name)[0].strip(" -,")
+    return "https://www.balibaby.co.il/search/?q=" + urllib.parse.quote(q)
+
+
 def balibaby_rows(base):
     """Bali Baby blocks automated access (bot check). The owner screen-recorded its category pages; each row of
     data/manual_balibaby.csv is one listing read by eye from a frame of those videos / screenshots (source column).
-    The recordings carry no product links, so the card links to the store's home page (the site says so)."""
+    The recordings carry no product links, so the card links to the store's search for that model."""
     import csv
     p = ROOT / "data" / "manual_balibaby.csv"
     if not p.exists():
@@ -369,7 +377,7 @@ def balibaby_rows(base):
             if reg is not None and reg <= price: reg = None  # struck price not above the price: no saving shown
             kw = dict(cat=r["cat"], brand=r["brand"], model=r["name"], subtitle=SUB.get(r["kind"], ""), price=n(price),
                       price_reg=n(reg), price_note="מחיר מבצע" if reg else "", in_stock=1,
-                      url="https://www.balibaby.co.il/", source_id=r["source"])
+                      url=bb_search(r["name"]), source_id=r["source"])
             if r["cat"] == "stroller": kw["type"] = r["kind"]
             else: kw["seat_group"] = r["kind"]
             rows.append(base("balibaby", "2026-11-18", **kw))

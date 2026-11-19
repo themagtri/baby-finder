@@ -79,9 +79,18 @@ section.screen.on{display:block;animation:fade .35s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
 /* hero (step 1) */
-.hero{position:relative;border-radius:28px;overflow:hidden;min-height:300px;display:flex;align-items:flex-end;margin-top:24px;background:#cdbfb4 center/cover no-repeat}
-.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,10,.12) 0%,rgba(10,10,10,.35) 45%,rgba(10,10,10,.72) 100%)}
-@media (max-width:620px){.hero h1{font-size:1.7rem}}
+.hero{position:relative;border-radius:28px;overflow:hidden;min-height:420px;display:flex;align-items:flex-end;margin-top:24px;background:#cdbfb4 center/cover no-repeat}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,10,.05) 0%,rgba(10,10,10,.45) 40%,rgba(10,10,10,.82) 100%)}
+.hero h1{font-size:clamp(1.9rem,4.6vw,3.2rem);font-weight:800;line-height:1.12;max-width:720px}
+.hero .hl{background:var(--sky);color:var(--navy);border-radius:10px;padding:0 .18em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.hero p{font-weight:500}
+.hero-vals{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.hero-vals li{background:rgba(255,251,248,.16);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(4px);border-radius:999px;padding:6px 12px;font-size:.9rem;font-weight:600;color:#fff}
+.hero-vals li::before{content:"✓ ";color:var(--sage,#d5e0a8)}
+.hero-cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.btn.hero-go{background:var(--paper);color:var(--ink);min-height:48px;white-space:nowrap}
+.btn.hero-go.alt{background:var(--sky);color:var(--navy)}
+@media (max-width:620px){.hero h1{font-size:1.85rem}.hero-vals li{font-size:.8rem}.btn.hero-go{flex:1 1 auto;padding:12px 14px}}
 .hero .in{position:relative;z-index:1;color:#fff;padding:32px clamp(20px,4vw,48px)}
 .hero h1{margin:8px 0 8px;color:#fff}
 .hero p{margin:0;font-size:1.08rem;max-width:560px;color:#fff}
@@ -145,7 +154,7 @@ section.screen.on{display:block;animation:fade .35s ease}
 @media (max-width:560px){.cta-bar .btn{padding:12px 18px}.cta-bar .btn.ghost{display:none}
   .tiles{grid-template-columns:1fr 1fr;gap:10px}.tile,.tiles.two .tile{min-height:150px}.tile .t{font-size:1.15rem}.tile small{font-size:.8rem}.tile .txt{padding:12px}
   .grid{grid-template-columns:1fr;gap:14px}.kf li{padding:6px 8px}.steps{margin-top:16px}.steps li{min-width:0}.steps button{font-size:.78rem}
-  h1{margin-top:18px}.hero{min-height:230px;margin-top:14px}.hero .in{padding:18px}.hero p{font-size:.95rem}.steps button{white-space:nowrap}.announce{font-size:.75rem;padding:7px 12px}.announce .more{display:none}.refine{gap:12px}.facts{gap:6px 18px}}
+  h1{margin-top:18px}.hero{min-height:380px;margin-top:14px}.hero .in{padding:18px}.hero p{font-size:.95rem}.steps button{white-space:nowrap}.announce{font-size:.75rem;padding:7px 12px}.announce .more{display:none}.refine{gap:12px}.facts{gap:6px 18px}}
 
 /* results */
 .res-head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px}
@@ -159,13 +168,45 @@ section.screen.on{display:block;animation:fade .35s ease}
 .fcount{background:var(--navy);color:#fff;border-radius:999px;font-size:.75rem;min-width:1.5em;padding:1px 6px;text-align:center}
 .fcount:empty{display:none}
 .refine[hidden]{display:none}
+.brand-det{flex-basis:100%}
+.brand-det summary{cursor:pointer;font-size:.75rem;font-weight:700;letter-spacing:.1em;color:var(--muted);padding:8px 0;min-height:32px;display:flex;align-items:center;gap:8px}
+.brand-det summary::after{content:"▾";font-size:.9rem}
+.brand-det[open] summary::after{content:"▴"}
+.item{position:relative}
+.fav-btn{position:absolute;top:14px;inset-inline-end:14px;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--paper);display:grid;place-items:center;cursor:pointer;z-index:1}
+.fav-btn svg{width:22px;height:22px;fill:none;stroke:#c2334d;stroke-width:2}
+.fav-btn[aria-pressed="true"] svg{fill:#c2334d}
+.cmp-btn{width:100%;margin-top:8px;border:1px solid var(--line-strong);background:var(--paper);color:var(--ink);border-radius:999px;padding:10px 16px;min-height:44px;font:inherit;font-weight:600;cursor:pointer}
+.cmp-btn[aria-pressed="true"]{background:var(--sage,#d5e0a8);border-color:var(--sage,#d5e0a8)}
+.cmp-btn.sm,.btn.sm{width:auto;padding:8px 14px;min-height:40px;margin:0;font-size:.85rem}
+.tray{position:sticky;top:84px;z-index:49;display:flex;justify-content:center;gap:8px;margin:8px auto 0;pointer-events:none}
+.tray[hidden]{display:none}
+.tray-btn{pointer-events:auto;border:0;border-radius:999px;background:var(--navy);color:#fff;font:inherit;font-weight:600;padding:9px 16px;min-height:44px;box-shadow:var(--shadow);cursor:pointer}
+.tray-btn[hidden]{display:none}
+.tray-btn .h{color:#ffb3c0}
+.wide-dlg{width:min(900px,calc(100vw - 24px))!important}
+.wide-dlg h2{margin:0 0 8px;padding-inline-end:40px}
+.cmp-scroll{overflow-x:auto;margin-top:10px}
+table.cmp{border-collapse:collapse;min-width:100%;font-size:.88rem}
+table.cmp th,table.cmp td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:start;vertical-align:top;min-width:124px}
+table.cmp thead th{font-weight:700;position:relative;padding-inline-end:34px}
+table.cmp .rh{position:sticky;inset-inline-start:0;background:var(--paper);min-width:96px;font-weight:600;color:var(--muted)}
+table.cmp tr.diff td{background:#f8ece5;font-weight:600}
+table.cmp .cb,.fav-list .cb{display:block;font-size:.72rem;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.unk{color:var(--muted);font-weight:400}
+.cmp-x{position:absolute;top:6px;inset-inline-end:4px;width:28px;height:28px;border-radius:50%;border:1px solid var(--line-strong);background:var(--paper);cursor:pointer;line-height:1}
+.fav-list{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:10px}
+.fav-list li{border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center}
+.fav-list small{display:block;color:var(--muted)}
+.fav-acts{display:flex;gap:8px;align-items:center}
+.fav-acts .cmp-x{position:static}
 .sort select{background:var(--paper);border:1px solid var(--line-strong);border-radius:999px;padding:8px 14px}
 .disclaimer{background:var(--blush);padding:14px 18px;border-radius:14px;font-size:.92rem;margin:18px 0;max-width:900px}
 .refine{display:flex;flex-wrap:wrap;gap:18px;margin:18px 0 22px;padding:16px 0;border-block:1px solid var(--line)}
 .refine .lbl{font-size:.75rem;font-weight:700;letter-spacing:.1em;color:var(--muted);margin-bottom:6px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:22px}
 .item{background:var(--paper);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow)}
-.item .head{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"ico brand" "name name" "sub sub";column-gap:12px;row-gap:6px;align-items:center}
+.item .head{padding-inline-end:48px;display:grid;grid-template-columns:auto 1fr;grid-template-areas:"ico brand" "name name" "sub sub";column-gap:12px;row-gap:6px;align-items:center}
 .item .head .ico{grid-area:ico}
 .item .head .brand{grid-area:brand;justify-self:start}
 .item .head h3{grid-area:name;margin-top:4px}
@@ -188,9 +229,9 @@ section.screen.on{display:block;animation:fade .35s ease}
 .info-btn{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--navy);background:var(--paper);color:var(--navy);
   font:italic 700 .72rem/1 Georgia,serif;cursor:pointer;display:inline-grid;place-items:center;padding:0;flex:none}
 .info-btn:hover{background:var(--navy);color:#fff}
-#infoDlg,#leaveDlg{border:0;border-radius:20px;padding:22px 20px 18px;width:min(440px,calc(100vw - 32px));max-height:85vh;overflow:auto;
+#infoDlg,#leaveDlg,.wide-dlg{border:0;border-radius:20px;padding:22px 20px 18px;width:min(440px,calc(100vw - 32px));max-height:85vh;overflow:auto;
   background:var(--paper);color:var(--ink);box-shadow:0 20px 60px rgba(10,10,10,.3)}
-#infoDlg::backdrop,#leaveDlg::backdrop{background:rgba(10,10,10,.45)}
+#infoDlg::backdrop,#leaveDlg::backdrop,.wide-dlg::backdrop{background:rgba(10,10,10,.45)}
 #infoDlg h2{margin:0 0 10px;font-size:1.15rem;padding-inline-end:36px}
 #infoDlg p{margin:0 0 10px;font-size:.94rem;line-height:1.6}
 .dlg-note{color:var(--muted);font-size:.82rem!important}
@@ -268,7 +309,6 @@ body.still *{animation:none!important;transition:none!important}
 </head>
 <body>
 <a class="skip" href="#main">דלג לתוכן הראשי</a>
-<div class="announce" id="announce">המחירים נבדקו ישירות באתרי המוכרים · אין כאן מוכר, רק קישור ישיר לדף המוצר</div>
 <header class="top">
   <div class="bar">
     <button class="logo restart" type="button" aria-label="מאתר העגלות - חזרה להתחלה"><span class="name">מאתר העגלות</span><span class="tag">עגלות ומושבי בטיחות בישראל</span></button>
@@ -278,6 +318,11 @@ body.still *{animation:none!important;transition:none!important}
     </div>
   </div>
 </header>
+<div class="tray" id="tray" hidden>
+  <button class="tray-btn" type="button" id="trayCmp" hidden><span aria-hidden="true">⚖</span> ההשוואה שלי (<span class="n">0</span>)</button>
+  <button class="tray-btn" type="button" id="trayFav" hidden><span class="h" aria-hidden="true">♥</span> מועדפים (<span class="n">0</span>)</button>
+</div>
+<p class="sr-only" id="trayMsg" role="status" aria-live="polite"></p>
 <div class="a11y-panel" id="a11yPanel" role="dialog" aria-label="הגדרות נגישות" hidden>
   <h2>נגישות</h2>
   <div class="a11y-row"><span>גודל טקסט</span><div class="grp"><button class="mini" type="button" data-zoom="1" aria-pressed="true">רגיל</button><button class="mini" type="button" data-zoom="1.15" aria-pressed="false">גדול</button><button class="mini" type="button" data-zoom="1.3" aria-pressed="false">גדול מאוד</button></div></div>
@@ -302,9 +347,11 @@ body.still *{animation:none!important;transition:none!important}
   <section class="screen on" id="s1" aria-labelledby="h1a">
     <div class="hero" id="hero">
       <div class="in">
-        <span class="eyebrow">השוואה וסינון · חינם</span>
-        <h1 id="h1a">עגלות וכסאות בטיחות בישראל, במקום אחד</h1>
+        <span class="eyebrow">השוואת מחירים · חינם</span>
+        <h1 id="h1a"><span class="hl">משווים מחירים</span> של עגלות וכסאות בטיחות בישראל</h1>
         <p>משווים, מסננים ובוחרים מה שנוח לכם. גם לפי תווי קנייה.</p>
+        <ul class="hero-vals" id="heroVals"></ul>
+        <div class="hero-cta"><button class="btn hero-go" type="button" data-need="stroller">חיפוש עגלה</button><button class="btn hero-go alt" type="button" data-need="carseat">חיפוש כסא בטיחות</button></div>
       </div>
     </div>
     <ul class="facts" id="facts"></ul>
@@ -337,7 +384,6 @@ body.still *{animation:none!important;transition:none!important}
         <output id="maxOut" for="maxPrice" aria-live="polite"></output>
         <input type="range" id="maxPrice" min="0" max="5000" step="50">
         <div class="ends"><span id="minEnd"></span><span id="maxEnd"></span></div>
-        <label class="toggle"><input type="checkbox" id="noPrice" checked> להציג גם מוצרים בלי מחיר באתר</label>
       </div>
       <div class="panel club-pick" id="clubPick" role="group" aria-labelledby="clubPickH" hidden>
         <h2 class="lbl-lg" id="clubPickH">יש לכם תווי קנייה או כרטיס מועדון?</h2>
@@ -371,6 +417,18 @@ body.still *{animation:none!important;transition:none!important}
   </footer>
 </div>
 
+<dialog id="cmpDlg" class="wide-dlg" aria-labelledby="cmpTitle">
+  <button class="dlg-x" type="button" data-close="cmpDlg" aria-label="סגירה">×</button>
+  <h2 id="cmpTitle">ההשוואה שלי</h2>
+  <label class="toggle"><input type="checkbox" id="cmpOnly"> להציג רק את ההבדלים</label>
+  <div id="cmpBody"></div>
+</dialog>
+<dialog id="favDlg" class="wide-dlg" aria-labelledby="favTitle">
+  <button class="dlg-x" type="button" data-close="favDlg" aria-label="סגירה">×</button>
+  <h2 id="favTitle">המועדפים שלי</h2>
+  <p class="dlg-note">נשמרים רק בדפדפן הזה.</p>
+  <div id="favBody"></div>
+</dialog>
 <dialog id="leaveDlg" aria-labelledby="leaveTitle">
   <button class="dlg-x" type="button" id="leaveClose" aria-label="סגירה">×</button>
   <h2 class="leave-eyebrow" id="leaveTitle">אתם עומדים לצאת מהאתר</h2>
@@ -397,7 +455,8 @@ body.still *{animation:none!important;transition:none!important}
 (function(){
 "use strict";
 // owner: products out of stock at the seller are not shown at all
-const ITEMS = (window.ITEMS || []).filter(i=>i.st===1);
+// in stock and with a price on the seller's site (products without a price are never shown)
+const ITEMS = (window.ITEMS || []).filter(i=>i.st===1 && i.p!=null);
 const CLUBS = window.CLUBS || {};   // seller -> [{n: club name, src: source url}]
 // only cards/clubs of sellers that have products on the site, so the filter never leads to an empty list
 const SELLERS = new Set(ITEMS.map(i=>i.s));
@@ -411,7 +470,7 @@ const shekel = n => "₪" + (Number.isInteger(n) ? nf.format(n) : nf2.format(n))
 const IMG = (id,w) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w||800}&q=70`;
 const BG = (id,w) => `background-image:url('${IMG(id,w)}')`;
 const PH = {
-  hero:"1733380005522-b8d76ce49d13", stroller:"1760160639570-e682e4595f86", carseat:"1619719287848-883c8f26efbc",
+  hero:"1741990811736-81fd08f449e5", stroller:"1760160639570-e682e4595f86", carseat:"1619719287848-883c8f26efbc",
   t_full:"1636384919179-d936e55c5cca", t_stroller:"1784751722840-471e603b467f", t_travel:"1773063082298-91b61b59bc99",
   t_twin:"1744424846144-d57267a19ee8", t_carseatstroller:"1611223355350-5be15e624fdf",
   s_newborn:"1619719287848-883c8f26efbc", s_toddler:"1633111046443-13a0c30033ea",
@@ -492,7 +551,7 @@ const src = (kind, url) => !kind ? "" : (url && kind==="maker"
 const STD_HE = {"R129":"R129 (i-Size)"};
 const FOLD_HE = {book:"ספר", "3d":"תלת-ממדי", umbrella:"מטרייה"};
 
-const S = {step:1, aio:false, need:null, types:new Set(), stage:null, reqs:new Set(), max:null, stock:true, noprice:true, sort:"mix", clubs:new Set(), filtersOpen:false};
+const S = {step:1, aio:false, need:null, types:new Set(), stage:null, reqs:new Set(), max:null, stock:true, noprice:true, sort:"mix", clubs:new Set(), filtersOpen:false, brands:new Set(), brandOpen:false};
 
 function poolNeed(){ return ITEMS.filter(i=>i.c===S.need); }
 function filtered(opts){
@@ -507,11 +566,9 @@ function filtered(opts){
       if(unk){ hiddenUnknown++; return false; }
     }
     if(S.aio && !isAIO(i)) return false;
+    if(S.brands.size && !S.brands.has(i.b)) return false;
     if(S.clubs.size && !(CLUBS[i.s]||[]).some(c=>S.clubs.has(c.n))) return false;
-    if(!opts.ignoreBudget){
-      if(i.p==null){ if(!S.noprice) return false; }
-      else if(S.max!=null && i.p>S.max) return false;
-    }
+    if(!opts.ignoreBudget && S.max!=null && i.p>S.max) return false;
     return true;
   });
   return {list:out, hiddenUnknown};
@@ -550,7 +607,8 @@ function tile(attrs, img, title, sub, cnt, pressed, disabled){
 function renderHome(){
   $("#hero").style.cssText = BG(PH.hero,1600);
   const sellers=new Set(ITEMS.map(i=>i.s)).size, brands=new Set(ITEMS.map(i=>i.b)).size;
-  $("#facts").innerHTML = `<li><b>${nf.format(ITEMS.length)}</b>מוצרים</li><li><b>${brands}</b>מותגים</li><li><b>${sellers}</b>מוכרים</li><li><b>חינם</b>בלי הרשמה</li>`;
+  $("#heroVals").innerHTML = `<li>${sellers} חנויות, ${nf.format(ITEMS.length)} מוצרים</li><li>כל המחירים של דגם בכרטיס אחד</li><li>סינון לפי תווי קנייה</li>`;
+  $("#facts").innerHTML = `<li><b>${nf.format(ITEMS.length)}</b>מוצרים</li><li><b>${brands}</b>מותגים</li><li><b>${sellers}</b>מוכרים</li>`;
   $("#needOpts").innerHTML = NEEDS.map(n=>tile(`data-need="${n.k}"`, PH[n.k], n.he, n.sub, nf.format(ITEMS.filter(i=>i.c===n.k).length)+" מוצרים", S.need===n.k)).join("");
 }
 function renderPrefs(){
@@ -578,7 +636,6 @@ function renderBudget(){
   r.min=lo; r.max=hi; if(S.max==null || S.max>hi || S.max<lo) S.max=hi; r.value=S.max;
   $("#minEnd").textContent=shekel(lo); $("#maxEnd").textContent=shekel(hi);
   updateMaxOut();
-  $("#noPrice").checked=S.noprice;
   renderClubPick();
 }
 // vouchers / club cards the user has: "אין" (default) or one or more; same filter as on the results screen
@@ -664,15 +721,17 @@ function title(i){
   return t.length >= 3 ? t : n;
 }
 // one card per model: every seller's in-stock offer of the same model family (data.js "fm") in one card
+// a model's key: the cross-seller family when known, else this one listing (seller + url + name)
+const gkey = i => i.fm ? "f:"+i.fm : "x:"+i.s+"|"+i.u+"|"+i.n;
 function groups(list){
   const by=new Map();
-  list.forEach((i,ix)=>{ const k=i.fm? "f:"+i.fm : "x:"+ix; if(!by.has(k)) by.set(k,[]); by.get(k).push(i); });
-  return [...by.values()].map(g=>{
+  list.forEach(i=>{ const k=gkey(i); if(!by.has(k)) by.set(k,[]); by.get(k).push(i); });
+  return [...by.entries()].map(([key,g])=>{
     const best={};   // cheapest offer per seller (Super-Pharm cards name the store that actually sells)
     g.forEach(i=>{ const s=i.sn; if(!best[s] || (i.p!=null && (best[s].p==null || i.p<best[s].p))) best[s]=i; });
     const nv = o => (CLUBS[o.s]||[]).filter(c=>c.k==="voucher").length;
     const offers=Object.values(best).sort((a,b)=>((a.p??1e9)-(b.p??1e9)) || (nv(b)-nv(a)));   // same price: the store that takes vouchers first
-    return {rep:offers[0], offers};
+    return {key, rep:offers[0], offers};
   });
 }
 const homeOnly = u => /^https?:\/\/[^/]+\/?$/.test(u||"");
@@ -713,7 +772,9 @@ function card(g, idx){
     : `${clubTags(i)}<div class="seller"><span>נמכר ב: <b>${esc(i.sn)}</b></span></div>`;
   CARDS[idx]=g;
   const sub = n>1 ? (i.d||"").replace(/מגוון צבעים \(\d+\)/, "מגוון צבעים") : i.d;   // the colour count belongs to one seller
+  const fv=FAV.has(g.key), cm=CMP.includes(g.key);
   return `<article class="item">
+    <button class="fav-btn" type="button" data-fav="${esc(g.key)}" aria-pressed="${fv}" aria-label="${fv?"הסרה מהמועדפים":"הוספה למועדפים"}: ${esc(title(i))}">${HEART}</button>
     <div class="body">
       <div class="head">${icon(ik)}<span class="brand">${LOGOS[i.b]? `<img class="logo-img" src="${LOGOS[i.b]}" alt="${esc(i.b)}" loading="lazy">` : i.b ? `<span class="brand-pill">${esc(i.b)}</span>` : ""}</span><h3>${esc(title(i))}</h3>${sub? `<p class="sub">${esc(sub)}</p>`:""}</div>
       ${badges? `<div class="badges">${badges}</div>`:""}
@@ -721,17 +782,18 @@ function card(g, idx){
       <ul class="kf">${facts(i)}</ul>
       ${offers}
       <button class="btn go" type="button" data-leave="${idx}">${n===1 && homeOnly(i.u) ? "לאתר החנות" : "לדף המוצר אצל המוכר"}<span aria-hidden="true"> ↗</span></button>
+      <button class="cmp-btn" type="button" data-cmp="${esc(g.key)}" aria-pressed="${cm}">${cm? "✓ בהשוואה" : "+ הוספה להשוואה"}</button>
     </div>
   </article>`;
 }
 let leaveOpener=null;
-function openLeave(idx, opener){
-  const g=CARDS[idx]; if(!g) return;
+function openLeave(idx, opener){ const g=CARDS[idx]; if(g) openLeaveG(g, opener); }
+function openLeaveG(g, opener){
   leaveOpener=opener;
   const i=g.rep;
   $("#leaveWhat").innerHTML = `${i.b? esc(i.b)+" · ":""}${esc(title(i))}<small>${g.offers.length>1? g.offers.length+" מוכרים, מהזול ליקר" : esc(i.sn)}</small>`;
   $("#leaveList").innerHTML = g.offers.map(o=>`<a class="leave-go" href="${esc(o.u)}" target="_blank" rel="noopener nofollow" data-out="${esc(o.s)}">
-      <span>${esc(o.sn)}${homeOnly(o.u)? "<small>לאתר החנות, חפשו שם את הדגם</small>" : o.pn? `<small>${esc(o.pn)}</small>`:""}</span>
+      <span>${esc(o.sn)}${homeOnly(o.u)? "<small>לאתר החנות, חפשו שם את הדגם</small>" : /\/search\/\?q=/.test(o.u)? "<small>חיפוש הדגם באתר החנות</small>" : o.pn? `<small>${esc(o.pn)}</small>`:""}</span>
       <span class="lp">${o.p!=null? shekel(o.p) : "—"} <span aria-hidden="true">↗</span></span><span class="sr-only"> (נפתח בלשונית חדשה)</span></a>`).join("");
   const d=$("#leaveDlg"); if(d.showModal) d.showModal(); else d.setAttribute("open","");
   $("#leaveList a").focus();
@@ -750,7 +812,13 @@ function renderRefine(){
       CLUB_NAMES.map(n=>`<button class="opt" type="button" data-club="${esc(n)}" aria-pressed="${S.clubs.has(n)}">${esc(n)}</button>`).join("")+`</div></div>`;
   if(S.need==="carseat" && S.stage!=="infant" && S.stage!=="aio")
     html += `<div><div class="lbl">סוג כסא</div><div class="opt-row small"><button class="opt" type="button" data-aio="" aria-pressed="${!S.aio}">הכל</button><button class="opt" type="button" data-aio="1" aria-pressed="${!!S.aio}">All in One בלבד</button></div></div>`;
+  // brand: closed by default, opens on request
+  const bc={}; poolNeed().forEach(i=>{ if(i.b) bc[i.b]=(bc[i.b]||0)+1; });
+  const bn=Object.keys(bc).sort((a,b)=>a.localeCompare(b,"he"));
+  if(bn.length) html += `<details class="brand-det" id="brandDet"${S.brandOpen||S.brands.size?" open":""}><summary>מותג${S.brands.size? ` <span class="fcount">${S.brands.size}</span>`:""}</summary><div class="opt-row small"><button class="opt" type="button" data-brand="" aria-pressed="${!S.brands.size}">הכל</button>`+
+      bn.map(b=>`<button class="opt" type="button" data-brand="${esc(b)}" aria-pressed="${S.brands.has(b)}">${esc(b)}</button>`).join("")+`</div></details>`;
   $("#refine").innerHTML = html;
+  const bd=$("#brandDet"); if(bd) bd.addEventListener("toggle",()=>{ S.brandOpen=bd.open; });
 }
 // default order: Cybex first (owner's choice, not paid; a paid spot would be marked "ממומן"), then brands
 // interleaved, in an order shuffled once per page load (stable while the user changes filters)
@@ -766,6 +834,90 @@ function mixOrder(gs){
   const top=new Set([...gs].filter(isCybex).sort((a,b)=>key(a)-key(b)).slice(0,CYBEX_TOP));
   return g=>[top.has(g)?0:1, rank.get(g)[0], rank.get(g)[1]];
 }
+/* ---------- favorites and compare (kept in this browser only) ---------- */
+const HEART='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-9.3-9.2C1.5 8.2 3.4 4.5 7 4.5c2.1 0 3.6 1.2 5 3 1.4-1.8 2.9-3 5-3 3.6 0 5.5 3.7 4.3 6.8-1.8 4.6-9.3 9.2-9.3 9.2z"/></svg>';
+const CMP_MAX=4;
+const ALLG=new Map(groups(ITEMS).map(g=>[g.key,g]));   // every model, unfiltered, for the favorites and compare views
+function load(k){ try{ return JSON.parse(localStorage.getItem(k)||"[]").filter(x=>ALLG.has(x)); }catch(e){ return []; } }
+function save(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+const FAV=new Set(load("bf_fav"));
+let CMP=load("bf_cmp");
+function say(msg){ const s=$("#trayMsg"); s.textContent=""; setTimeout(()=>{ s.textContent=msg; },50); }
+function toggleFav(k){
+  const g=ALLG.get(k); if(!g) return;
+  if(FAV.has(k)){ FAV.delete(k); say("הוסר מהמועדפים"); } else { FAV.add(k); say("נוסף למועדפים"); }
+  save("bf_fav",[...FAV]); refreshMarks(); if($("#favDlg").open) renderFav();
+}
+function toggleCmp(k){
+  const g=ALLG.get(k); if(!g) return;
+  if(CMP.includes(k)){ CMP=CMP.filter(x=>x!==k); say("הוסר מההשוואה"); }
+  else {
+    const other=CMP.length && ALLG.get(CMP[0]).rep.c!==g.rep.c;
+    if(other){ CMP=[]; say("משווים עגלות לחוד ומושבי בטיחות לחוד, לכן התחלנו השוואה חדשה"); }
+    if(CMP.length>=CMP_MAX){ say(`אפשר להשוות עד ${CMP_MAX} דגמים. הסירו אחד כדי להוסיף`); return; }
+    CMP.push(k); if(!other) say(`נוסף להשוואה (${CMP.length})`);
+  }
+  save("bf_cmp",CMP); refreshMarks(); if($("#cmpDlg").open) renderCmp();
+}
+function refreshMarks(){
+  document.querySelectorAll("[data-fav]").forEach(b=>{ if(b.classList.contains("fav-btn")){ const on=FAV.has(b.dataset.fav); b.setAttribute("aria-pressed",on);
+    b.setAttribute("aria-label",(on?"הסרה מהמועדפים":"הוספה למועדפים")+": "+title(ALLG.get(b.dataset.fav).rep)); } });
+  document.querySelectorAll(".cmp-btn[data-cmp]").forEach(b=>{ const on=CMP.includes(b.dataset.cmp); b.setAttribute("aria-pressed",on); b.textContent = on? "✓ בהשוואה" : "+ הוספה להשוואה"; });
+  $("#trayCmp").hidden=!CMP.length; $("#trayCmp .n").textContent=CMP.length;
+  $("#trayFav").hidden=!FAV.size; $("#trayFav .n").textContent=FAV.size;
+  $("#tray").hidden = !CMP.length && !FAV.size;
+}
+const dlgOpener={};
+function showDlg(id, opener){ dlgOpener[id]=opener; const d=$("#"+id); if(d.showModal) d.showModal(); else d.setAttribute("open",""); d.querySelector(".dlg-x").focus(); }
+function closeDlg(id){ const d=$("#"+id); if(d.open) d.close(); const o=dlgOpener[id]; if(o && document.contains(o)) o.focus(); }
+const unk='<span class="unk">לא צוין</span>';
+function cmpRows(c){
+  const R=[["המחיר הכי זול", g=>shekel(g.rep.p)],
+           ["מוכרים", g=>g.offers.map(o=>esc(o.sn)+" "+shekel(o.p)).join("<br>")],
+           ["הנחה במבצע", g=>{ const s=Math.max(...g.offers.map(saving)); return s? "עד "+shekel(s)+" לפי המוכר" : "—"; }],
+           ["תווי קנייה", g=>{ const v=[...new Set(g.offers.flatMap(o=>vouchers(o)))]; return v.length? v.map(esc).join(", ") : "—"; }]];
+  if(c==="stroller") R.push(
+    ["סוג", g=>{ const t=TYPES.find(t=>t.k===g.rep.t); return t? t.he : unk; }],
+    ["גיל", g=>{ const i=g.rep; return (i.a0!=null && i.a1!=null)? `${fmtAge(i.a0)} עד ${fmtAge(i.a1)}` : unk; }],
+    ["קיפול", g=>g.rep.f? (FOLD_HE[g.rep.f]||esc(g.rep.f)) : unk],
+    ["פרטים מהמוכר", g=>g.rep.d? esc(g.rep.d) : "—"]);
+  else R.push(
+    ["סוג", g=>GROUPS[g.rep.g]||unk],
+    ["All in One", g=>isAIO(g.rep)? "כן" : "—"],
+    ["תקן", g=>g.rep.std? esc(STD_HE[g.rep.std]||g.rep.std) : unk],
+    ["גיל", g=>{ const i=g.rep; return i.a0!=null ? (i.a1!=null ? `${fmtAge(i.a0)} עד ${fmtAge(i.a1)}` : `מ${fmtAge(i.a0)}`) : unk; }],
+    ["ISOFIX", g=>g.rep.iso? (ISO_HE[g.rep.iso]||esc(g.rep.iso)) : unk],
+    ["מסתובב", g=>g.rep.rot===1? "כן" : unk],
+    ["גובה הילד", g=>g.rep.h0!=null? `${g.rep.h0}–${g.rep.h1} ס"מ` : unk],
+    ["משקל הילד עד", g=>g.rep.w1!=null? `${g.rep.w1} ק"ג` : unk]);
+  return R;
+}
+function renderCmp(){
+  const gs=CMP.map(k=>ALLG.get(k)).filter(Boolean);
+  const box=$("#cmpBody");
+  if(!gs.length){ box.innerHTML='<p class="dlg-note">אין עדיין דגמים בהשוואה. לחצו "הוספה להשוואה" בכרטיס.</p>'; return; }
+  const only=$("#cmpOnly").checked;
+  const head=`<tr><th scope="col" class="rh"><span class="sr-only">נתון</span></th>${gs.map(g=>`<th scope="col"><span class="cb">${esc(g.rep.b||"")}</span>${esc(title(g.rep))}
+      <button class="cmp-x" type="button" data-cmp="${esc(g.key)}" aria-label="הסרה מההשוואה: ${esc(title(g.rep))}">×</button></th>`).join("")}</tr>`;
+  const rows=cmpRows(gs[0].rep.c).map(([lbl,f])=>{ const v=gs.map(f), diff=new Set(v).size>1;
+    if(only && !diff && gs.length>1) return "";
+    return `<tr class="${diff?"diff":""}"><th scope="row" class="rh">${lbl}</th>${v.map(x=>`<td>${x}</td>`).join("")}</tr>`; }).join("");
+  const go=`<tr><th scope="row" class="rh"><span class="sr-only">קישור</span></th>${gs.map(g=>`<td><button class="btn go sm" type="button" data-leavek="${esc(g.key)}">למוכר<span aria-hidden="true"> ↗</span></button></td>`).join("")}</tr>`;
+  box.innerHTML=`<div class="cmp-scroll"><table class="cmp"><caption class="sr-only">השוואה בין ${gs.length} דגמים</caption><thead>${head}</thead><tbody>${rows}${go}</tbody></table></div>
+    ${gs.length<2? '<p class="dlg-note">הוסיפו עוד דגם כדי לראות את ההבדלים.</p>' : '<p class="dlg-note">שורה מודגשת = יש הבדל בין הדגמים. הנתונים כפי שהמוכר כתב.</p>'}`;
+}
+function openCmp(opener){ renderCmp(); showDlg("cmpDlg", opener); }
+function renderFav(){
+  const gs=[...FAV].map(k=>ALLG.get(k)).filter(Boolean);
+  $("#favBody").innerHTML = gs.length ? `<ul class="fav-list">${gs.map(g=>`<li><div><span class="cb">${esc(g.rep.b||"")}</span><b>${esc(title(g.rep))}</b>
+      <small>${shekel(g.rep.p)}${g.offers.length>1? ` · הכי זול מבין ${g.offers.length} מוכרים`:` · ${esc(g.rep.sn)}`}</small></div>
+      <div class="fav-acts"><button class="btn go sm" type="button" data-leavek="${esc(g.key)}">למוכר<span aria-hidden="true"> ↗</span></button>
+      <button class="cmp-btn sm" type="button" data-cmp="${esc(g.key)}" aria-pressed="${CMP.includes(g.key)}">${CMP.includes(g.key)? "✓ בהשוואה":"+ הוספה להשוואה"}</button>
+      <button class="cmp-x" type="button" data-fav="${esc(g.key)}" aria-label="הסרה מהמועדפים: ${esc(title(g.rep))}">×</button></div></li>`).join("")}</ul>`
+    : '<p class="dlg-note">אין עדיין מועדפים. לחצו על הלב בכרטיס.</p>';
+}
+function openFav(opener){ renderFav(); showDlg("favDlg", opener); }
+
 function renderResults(){
   const {list, hiddenUnknown} = filtered();
   const aioLast = S.need==="carseat" && S.stage && S.stage!=="infant";
@@ -783,7 +935,7 @@ function renderResults(){
   $("#resTitle").textContent = S.need==="carseat" ? "מושבי בטיחות שמתאימים לכם" : "עגלות שמתאימות לכם";
   $("#resCount").textContent = `${nf.format(sorted.length)} דגמים · אותו דגם אצל כמה מוכרים מופיע בכרטיס אחד`;
   $("#sortSel").value = S.sort;
-  const nF = S.types.size + (S.stage?1:0) + S.clubs.size + (S.aio?1:0);
+  const nF = S.types.size + (S.stage?1:0) + S.clubs.size + (S.aio?1:0) + S.brands.size;
   $("#filterCount").textContent = nF ? String(nF) : "";
   $("#filterBtn").setAttribute("aria-label", nF ? `סינון, ${nF} מסננים פעילים` : "סינון");
   $("#filterBtn").setAttribute("aria-expanded", String(S.filtersOpen));
@@ -793,6 +945,7 @@ function renderResults(){
   CARDS.length=0;
   $("#grid").innerHTML = sorted.length ? sorted.map((g,ix)=>card(g,ix)).join("") :
     `<div class="empty">אין תוצאות לבחירות האלה. נסו להרחיב את התקציב, לכלול מוצרים שאזלו מהמלאי או להסיר דרישה.</div>`;
+  refreshMarks();
   $("#hiddenNote").textContent = hiddenUnknown ? `${hiddenUnknown} מושבים נוספים לא מוצגים כי המוכר לא ציין נתון שבחרתם.` : "";
 }
 function renderChips(){
@@ -802,6 +955,7 @@ function renderChips(){
   if(S.need==="carseat" && S.stage) c.push(STAGES.find(s=>s.k===S.stage).he);
   if(S.need==="carseat") for(const k of S.reqs) c.push(REQS.find(r=>r.k===k).he);
   for(const k of S.clubs) c.push("תו / מועדון: "+k);
+  if(S.brands.size) c.push("מותג: "+[...S.brands].map(esc).join(", "));
   if(S.step>=3 && S.max!=null && S.max<+$("#maxPrice").max) c.push("עד "+shekel(S.max));
   $("#chips").innerHTML=c.map(x=>`<span class="chip">${x}</span>`).join("");
 }
@@ -816,7 +970,7 @@ function renderBar(){
 }
 
 /* ---------- events ---------- */
-function reset(){ S.clubs.clear(); S.need=null; S.types.clear(); S.stage=null; S.reqs.clear(); S.max=null; S.aio=false; S.noprice=true; S.sort="mix"; S.filtersOpen=false; }
+function reset(){ S.clubs.clear(); S.need=null; S.types.clear(); S.stage=null; S.reqs.clear(); S.max=null; S.aio=false; S.noprice=true; S.sort="mix"; S.filtersOpen=false; S.brands.clear(); S.brandOpen=false; }
 document.addEventListener("click", e=>{
   const b=e.target.closest("button"); if(!b || b.closest("#a11yPanel")) return;
   if(b.dataset.info){ openInfo(b.dataset.info, b); return; }
@@ -828,11 +982,23 @@ document.addEventListener("click", e=>{
   if(b.dataset.stage!==undefined){ const k=b.dataset.stage||null; S.stage = (S.step===2 && S.stage===k) ? null : k; rerender(); return; }
   if(b.dataset.req){ const k=b.dataset.req; S.reqs.has(k)? S.reqs.delete(k) : S.reqs.add(k); rerender(); return; }
   if(b.dataset.club!==undefined){ const k=b.dataset.club; if(!k) S.clubs.clear(); else S.clubs.has(k)? S.clubs.delete(k) : S.clubs.add(k); rerender(); return; }
+  if(b.dataset.brand!==undefined){ const k=b.dataset.brand; if(!k) S.brands.clear(); else S.brands.has(k)? S.brands.delete(k) : S.brands.add(k); rerender(); return; }
+  if(b.dataset.fav){ toggleFav(b.dataset.fav); return; }
+  if(b.dataset.cmp){ toggleCmp(b.dataset.cmp); return; }
+  if(b.dataset.leavek){ const g=ALLG.get(b.dataset.leavek); if(g) openLeaveG(g, b); return; }
+  if(b.id==="trayCmp"){ openCmp(b); return; }
+  if(b.id==="trayFav"){ openFav(b); return; }
+  if(b.dataset.close){ closeDlg(b.dataset.close); return; }
   if(b.dataset.aio!==undefined){ S.aio = b.dataset.aio==="1"; rerender(); return; }
 });
 function rerender(){ if(S.step===2) renderPrefs(); if(S.step===3) renderClubPick(); if(S.step===4) renderResults(); renderChips(); renderBar(); }
 $("#infoClose").addEventListener("click", closeInfo);
 $("#leaveClose").addEventListener("click", closeLeave);
+$("#cmpOnly").addEventListener("change", renderCmp);
+["cmpDlg","favDlg"].forEach(id=>{ const d=$("#"+id);
+  d.addEventListener("cancel", e=>{ e.preventDefault(); closeDlg(id); });
+  d.addEventListener("click", e=>{ if(e.target===d) closeDlg(id); }); });
+refreshMarks();
 $("#leaveDlg").addEventListener("cancel", e=>{ e.preventDefault(); closeLeave(); });
 $("#leaveDlg").addEventListener("click", e=>{ if(e.target.id==="leaveDlg") closeLeave(); else if(e.target.closest(".leave-go")) setTimeout(closeLeave, 0); });
 $("#infoDlg").addEventListener("cancel", e=>{ e.preventDefault(); closeInfo(); });
@@ -842,7 +1008,6 @@ $("#backBtn").addEventListener("click",()=>go(S.step-1));
 $("#filterBtn").addEventListener("click",()=>{ S.filtersOpen=!S.filtersOpen; $("#filterBtn").setAttribute("aria-expanded",String(S.filtersOpen)); $("#refine").hidden=!S.filtersOpen; });
 $("#sortSel").addEventListener("change",e=>{ S.sort=e.target.value; renderResults(); });
 $("#maxPrice").addEventListener("input",e=>{ S.max=+e.target.value; updateMaxOut(); renderBar(); });
-$("#noPrice").addEventListener("change",e=>{ S.noprice=e.target.checked; renderBar(); });
 
 /* accessibility panel (settings kept in this browser only) */
 const A11Y_KEY="bf-a11y";
@@ -868,7 +1033,7 @@ document.addEventListener("keydown",e=>{ if(e.key==="Escape" && !$("#a11yPanel")
 const dates=[...new Set(ITEMS.map(i=>i.chk).filter(Boolean))].sort();
 const last = dates.length ? fmtDate(dates[dates.length-1]) : "";
 $("#chkDate").textContent = last;
-if(last) $("#announce").innerHTML = `המחירים נבדקו באתרי המוכרים ב-${last}<span class="more"> · אין כאן מוכר, רק קישור ישיר לדף המוצר</span>`;
+
 renderHome(); go(1, true);
 })();
 </script>
