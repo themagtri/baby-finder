@@ -1,6 +1,6 @@
 # משימה ממתינה: אימות תקן ו-ISOFIX לכל דגם של כסא בטיחות
 
-נוצרה: 19.11.2026, לבקשת הבעלים. **מצב: ממתינה** (להתחיל כשהבעלים כותב "בצע את משימת אימות הכסאות").
+נוצרה: 19.11.2026, לבקשת הבעלים. **מצב: סבב ראשון בוצע ב-19.11.2026.** נשארו פתוחים הדגמים שבסוף הקובץ.
 
 ## המטרה
 ב-187 מתוך 214 כסאות שבמלאי (כ-167 דגמים שונים) חסר תקן או ISOFIX, כי המוכר לא כתב אותם בדף.
@@ -33,3 +33,14 @@
 
 ## להעריך מראש
 כ-167 דגמים, כלומר כמה סשנים. כדאי לעבוד לפי מותג ולשמור התקדמות ב-`data/maker_specs.csv` אחרי כל מותג.
+
+## תוצאות סבב ראשון (19.11.2026)
+- תקן: 58 → **134** מתוך 214 כסאות במלאי (64 מהיצרן, 12 מהיבואן).
+- ISOFIX: 40 → **103** (50 מהיצרן, 13 מהיבואן). 22 כרטיסים מציגים LATCH (דגמים אמריקאיים).
+- מקורות: 38 שורות ב-`data/maker_specs.csv`, לכל שורה URL.
+
+## נשאר לא ידוע (לסבב הבא, אם יש מקור)
+- מותגים פרטיים בלי מקור יצרן ברשת: Moona, Shilav, Infanti, Twigy, Dilians, Babysafe, Dearlee, Norr, Easy baby, Harmony, MU.
+- לא אומתו: Maxi-Cosi Mica 2 Pro Slide 360, RodiFix M; Britax Swivel Grow Max (+ ISOFIX של קווי ה-US);
+  Graco EasyTurn 360, Affix ו-Junior Maxi (ISOFIX); Nuna PRUU, RAVA next, TODL next, LUMN;
+  Kinderkraft I-LITE, FIX2GO ו-Comfort Up; Babyark; Chicco KidFit Adapt Plus; BeSafe iZi Go Modular (בשילב).

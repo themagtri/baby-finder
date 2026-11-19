@@ -11,7 +11,7 @@ KEYS = {"cat": "c", "type": "t", "seat_group": "g", "brand": "b", "model": "n", 
         "seller_name": "sn", "price": "p", "price_reg": "pr", "in_stock": "st", "url": "u", "standard": "std",
         "isofix": "iso", "rotating": "rot", "age_from_m": "a0", "age_to_m": "a1", "height_min_cm": "h0",
         "height_max_cm": "h1", "weight_max_kg": "w1", "fold": "f", "import_status": "imp", "checked": "chk",
-        "sponsored": "sp", "price_note": "pn"}
+        "sponsored": "sp", "price_note": "pn", "std_src": "ss", "iso_src": "is", "spec_url": "su"}
 NUM = {"price", "price_reg", "in_stock", "rotating", "age_from_m", "age_to_m", "height_min_cm", "height_max_cm",
        "weight_max_kg"}
 

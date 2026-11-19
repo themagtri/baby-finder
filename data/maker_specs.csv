@@ -1,0 +1,39 @@
+brand,pattern,standard,isofix,source_url,checked,note
+Cybex,cloud t|קלאוד t,R129,optional,https://www.cybex-online.com/en/gb/p/cs-pl-cloud-t-i-size.html,2026-11-19,UN R129/03; ISOFIX only via Base T / Base Z2 (separate product)
+Cybex,sirona t|סירונה t,R129,optional,https://www.cybex-online.com/en/gb/p/cs-pl-sirona-t-i-size.html,2026-11-19,UN R129/03; ISOFIX via Base T / Base Z2
+Cybex,solution t,R129,included,https://www.cybex-online.com/en/gb/p/cs-pl-solution-t-i-fix.html,2026-11-19,UN R129/03 100-150 cm; i-Fix ISOFIX connectors
+Cybex,pallas g3,R129,included,https://www.cybex-online.com/en/ae/p/cs-go-pallas-g3.html,2026-11-19,UN R129/04; ISOFIX + top tether 76-105 cm
+Cybex,sirona gi,R129,included,https://www.cybex-online.com/en/row/p/cs-go-sirona-g-i-size.html,2026-11-19,Sirona Gi: integrated ISOFIX base
+Cybex,cloud g|קלאוד g,R129,optional,https://www.cybex-online.com/en/row/p/cs-go-cloud-g-i-size.html,2026-11-19,UN R129/03; only with Base G (ISOFIX + load leg)
+Chicco,ever ?one|אבר וואן,R129,included,https://www.chicco.es/productos/de-paseo-y-en-el-coche/en-el-coche/sillas-de-coche/everone-i-size-40-150-cm-8058664181100-06087148950000.html,2026-11-19,ECE R129/03 40-150 cm; ISOFIX + support leg 40-105 cm
+Chicco,onefit|וואן פיט,FMVSS 213,latch,https://www.chiccousa.com/shop-our-products/car-seats/all-in-one/onefit-cleartex-all-in-one-car-seat/79741.html,2026-11-19,US model: meets FMVSS 213; LATCH connectors
+Chicco,fit ?3 ?x|פיט 3 איקס,FMVSS 213,latch,https://www.chiccousa.com/shop-our-products/car-seats/fit3x/fit3x-installation-faqs/,2026-11-19,US model: LATCH or vehicle belt install
+Chicco,nextfit|נקסטפיט,FMVSS 213,latch,https://www.chiccousa.com/on/demandware.static/-/Sites-Chicco-Library/default/dw21804ec8/manuals/nextfit/Chicco-NextFit-Zip-Product-Manual.pdf,2026-11-19,US convertible: manual has LATCH installation
+Chicco,kidfit cleartex|kidfit clear,FMVSS 213,,https://www.chiccousa.com/shop-our-products/car-seats/booster/kidfit-cleartex-plus-2-in-1-belt-positioning-booster-car-seat/79627.html,2026-11-19,US booster: meets FMVSS 213b; LATCH not confirmed on this page
+Chicco,fit ?360|פיט 360,FMVSS 213,latch,https://www.chiccousa.com/on/demandware.static/-/Sites-Chicco-Library/default/dw8f7e0edb/manuals/car-seats/Chicco-Fit360-Car-Seat.pdf,2026-11-19,US model: base installs with LATCH or belt (manual references US FMVSS LATCH system)
+Chicco,myfit,FMVSS 213,latch,https://www.chiccousa.com/on/demandware.static/-/Sites-Chicco-Library/default/dw81f0b40d/manuals/car-seats/Chicco-MyFit-Manual.pdf,2026-11-19,US harness+booster: LATCH in harness mode (manual)
+Chicco,gofit plus|גופיט פלוס,FMVSS 213,latch,https://www.chiccousa.com/baby-talk/guide-to-booster-seats/,2026-11-19,Chicco booster guide: GoFit Plus has LATCH
+Chicco,^(?!.*plus).*gofit,FMVSS 213,without,https://www.chiccousa.com/baby-talk/guide-to-booster-seats/,2026-11-19,Chicco booster guide: GoFit does not include LATCH
+Cybex,anoris,R129,included,https://www.cybex-online.com/en/be/p/CS_PL_Anoris_T2_i-Size_EN.html,2026-11-19,UN R129/03; integrated ISOFIX base + load leg
+Cybex,solution b,R129,included,https://www.cybex-online.com/en/gb/cbx-by-cybex/,2026-11-19,high-back booster with ISOFIX; UN R129 (page /04, B2 manual /03)
+Cybex,solution g2|סולושן g2,R129,included,https://www.cybex-online.com/en/row/p/cs-go-solution-g2.html,2026-11-19,UN R129/04; equipped with ISOFIX
+Cybex,aton b2|אטון,R129,optional,https://www.cybex-online.com/en/gb/cbx-by-cybex/,2026-11-19,Aton B2 i-Size 45-87 cm; ISOFIX via separate Base One
+Nuna,revv,FMVSS 213,latch,https://nunababy.com/media/catalog/product/I/M/IM_000281I_REVV_US_Manual_1376.pdf,2026-11-19,US manual: meets FMVSS 213; LATCH lower anchors
+Nuna,exec,FMVSS 213,latch,https://www.nunababy.com/media/catalog/product/N/u/Nuna_EXEC_User_Manual_US_1fe0.pdf,2026-11-19,US manual: belt and LATCH installs pass FMVSS 213
+Nuna,pipa next,R129,,https://nunababy.com/media/catalog/product/N/u/Nuna_BASEnext_User_Manual_GL_8e0e.pdf,2026-11-19,BASE next manual: PIPA next R129 40-83 cm
+Nuna,pipa urbn,R129,included,https://nunababy.com/media/catalog/product/N/u/Nuna_PIPAurbn_FitGuide_GL_32a8.pdf,2026-11-19,fit guide: integral ISOFIX (no base) R129
+Nuna,arra,R129,,https://nunababy.com/media/catalog/product/N/u/Nuna_ARRA_User_Manual_GL_743c.pdf,2026-11-19,ARRA manual: UN R129 i-Size 40-85 cm
+Britax,kidfix|קידפיקס,R129,included,https://www.which.co.uk/reviews/child-car-seats/britax-romer-kidfix-i-size,2026-11-19,Kidfix i-Size: UN R129; ISOFIX or 3-point belt
+Britax,advansafix|אדוונספיקס,R129,included,https://www.which.co.uk/reviews/child-car-seats/britax-romer-advansafix-pro,2026-11-19,Advansafix Pro i-Size R129 76-150 cm; ISOFIX
+Doona,doona,R129,optional,https://www.doona.com/car-seat-stroller/accessories/isofix-x-base,2026-11-19,Doona i / X meet i-Size R129; ISOFIX via separate base
+Graco,turn2me,,included,https://gracobaby.eu/uk/turn2me-i-size-rotating-car-seat,2026-11-19,Graco EU: 360 rotating ISOFIX seat (i-Size R129 version)
+Graco,tranzitions,FMVSS 213,,https://www.gracobaby.com/,2026-11-19,US-market harness booster (Graco US line)
+Evenflo,revolve,FMVSS 213,latch,https://www.evenflo.com/pages/revolve-360-slim-faqs,2026-11-19,Evenflo: meets all applicable US Federal Safety Standards; LATCH connectors
+Evenflo,all4stages,FMVSS 213,,https://www.evenflo.com/collections/car-seats,2026-11-19,Evenflo: car seats meet FMVSS 213 and 302
+Britax,one4life|וואן פור לייף,FMVSS 213,,https://us.britax.com/support/faq/convertible-car-seats,2026-11-19,US-market Britax line (ClickTight); FMVSS 213
+Britax,poplar|פופלר,FMVSS 213,,https://us.britax.com/support/faq/convertible-car-seats,2026-11-19,Britax US FAQ: Poplar / Poplar S (ClickTight) - US model
+Britax,galaxy ?360,FMVSS 213,,https://us.britax.com/shop/car-seats/galaxy360-slim-rotating-convertible-car-seat,2026-11-19,us.britax.com product (US model)
+Britax,grow with you|growwithyou|גרו,FMVSS 213,,https://us.britax.com/support/faq/convertible-car-seats,2026-11-19,US-market Britax harness-to-booster line
+Maxi-Cosi,אמה 360|emme 360,FMVSS 213,,https://www.maxicosi.com/us-en,2026-11-19,Emme 360 is a Maxi-Cosi US rotating convertible
+Joie,i ?-?snug,R129,optional,https://dl.joiebaby.com/Instruction_Manual/GL/i-Snug-2/Joie-carseat-i-snug-2-instruction-manual.pdf,2026-11-19,ECE R129/03 40-75 cm; ISOFIX via i-Base 2 (separate)
+Joie,i ?-?jemini,R129,optional,https://dl.joiebaby.com/Instruction_Manual/GL/i-Base-2/Joie-carseat-i-base-2-instruction-manual.pdf,2026-11-19,i-Base 2 manual covers i-Jemini; R129; base separate

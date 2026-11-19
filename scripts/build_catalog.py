@@ -17,7 +17,7 @@ TODAY = datetime.date.today()
 
 FIELDS = ["cat", "type", "seat_group", "brand", "model", "subtitle", "seller", "seller_name", "price", "price_reg",
           "in_stock", "url", "standard", "isofix", "rotating", "age_from_m", "age_to_m", "height_min_cm",
-          "height_max_cm", "weight_max_kg", "fold", "import_status", "checked", "source_id", "price_note", "family"]
+          "height_max_cm", "weight_max_kg", "fold", "import_status", "checked", "source_id", "price_note", "family", "std_src", "iso_src", "spec_url"]
 
 SELLER_NAME = {"besafe": "BeSafe ישראל", "segal": "סגל בייבי", "babyjogger": "Baby Jogger ישראל", "joie": "Joie ישראל",
                "cybex": "Cybex ישראל", "chicco": "Chicco ישראל",
@@ -233,7 +233,7 @@ def family(r):
         return ""
     ed = next((lbl for k, lbl in EDITIONS if re.search(k, name, re.I)), "")
     bundle = "+carseat" if r["cat"] == "stroller" and re.search(r"סל קל|סלקל|קלאוד|cloud", name, re.I) else ""
-    if re.search(r"חשמלי|e-priam|e", name, re.I): bundle += "+electric"
+    if re.search(r"חשמלי|e-priam|\be\b", name, re.I): bundle += "+electric"
     if re.search(r"bonpoint|בונפואה", name, re.I): ed = "Bonpoint"
     return f"{fam}|{ed}|{bundle}|{r['cat']}|{r['type'] or r['seat_group']}"
 
@@ -244,10 +244,10 @@ GENERIC = set("""עגלת עגלה עגלות תינוק טיולון כיסא �
 
 ISO_NO = re.compile(r"ללא (?:חיבור )?(?:איזופיקס|isofix)", re.I)
 ISO_BASE_SEP = re.compile(r"ללא בסיס|בסיס (?:נמכר )?בנפרד", re.I)
-ISO_YES = re.compile(r"איזופיקס|isofix|i-?fix|kidfix|rodifix|isofit|iso-?fix", re.I)
-STD_RULES = [(re.compile(r"i[- ]?size|r ?129", re.I), "R129"), (re.compile(r"r ?44", re.I), "R44/04"),
+ISO_YES = re.compile(r"איזופיקס|isofix|i[- ]?fix\b|kidfix|rodifix|isofit|iso-?fix", re.I)
+STD_RULES = [(re.compile(r"i[- ]?size|r ?129", re.I), "R129"), (re.compile(r"\br ?44", re.I), "R44/04"),
              (re.compile(r"fmvss", re.I), "FMVSS 213")]
-ROT = re.compile(r"מסתובב|360|360|swivel|סיבוב", re.I)
+ROT = re.compile(r"מסתובב|\b360|360\b|swivel|סיבוב", re.I)
 
 
 def name_facts(rows):
@@ -275,6 +275,56 @@ def name_facts(rows):
     for c in conflicts:
         print("  NAME CONFLICT", c, file=sys.stderr)
     return conflicts
+
+
+IMPORTER_SITES = {"joie", "besafe", "cybex", "chicco", "babyjogger", "segal"}
+
+
+def importer_fill(rows):
+    """Same model (same family key) sold by a chain: copy standard / ISOFIX that the official importer's own
+    site states. Marked std_src / iso_src = 'importer' so the card says where it came from."""
+    src = {}
+    for r in rows:
+        if r["seller"] in IMPORTER_SITES and r["family"] and r["cat"] == "carseat":
+            d = src.setdefault(r["family"].rsplit("|", 1)[0], {})  # same model/edition/bundle; seat type may be unknown
+            if r["standard"] and r["standard"] != "?": d.setdefault("standard", r["standard"])
+            if r["isofix"]: d.setdefault("isofix", r["isofix"])
+    for r in rows:
+        if r["cat"] != "carseat" or r["seller"] in IMPORTER_SITES or not r["family"]:
+            continue
+        d = src.get(r["family"].rsplit("|", 1)[0], {})
+        if not r["standard"] and d.get("standard"):
+            r["standard"], r["std_src"] = d["standard"], "importer"
+        if not r["isofix"] and d.get("isofix"):
+            r["isofix"], r["iso_src"] = d["isofix"], "importer"
+
+
+def maker_fill(rows):
+    """data/maker_specs.csv: one row per model checked on the maker's site (or another reliable source), with
+    a regex on the product name and the source URL. Fills only empty fields; disagreement is reported."""
+    path = ROOT / "data" / "maker_specs.csv"
+    if not path.exists():
+        return
+    specs = list(csv.DictReader(open(path, encoding="utf-8")))
+    for r in rows:
+        if r["cat"] != "carseat":
+            continue
+        for m in specs:
+            if m["brand"].lower() != (r["brand"] or "").lower() and m["brand"] != "*":
+                continue
+            if not re.search(m["pattern"], r["model"], re.I):
+                continue
+            for field, key, srcf in (("standard", "standard", "std_src"), ("isofix", "isofix", "iso_src")):
+                val = m.get(key) or ""
+                if not val:
+                    continue
+                if not r[field] or r[field] == "?":
+                    if r[field] == "?":
+                        continue  # the seller contradicts itself: stays unknown
+                    r[field], r[srcf], r["spec_url"] = val, "maker", m["source_url"]
+                elif r[field] != val:
+                    print("  MAKER CONFLICT", (r["seller"], r["model"][:50], field, r[field], val), file=sys.stderr)
+            break
 
 
 def merge_colours(rows):
@@ -320,6 +370,10 @@ def main():
     rows = from_woo("besafe", "BeSafe", ovs) + from_woo("segal", "Stokke", ovs) + \
         from_woo("babyjogger", "Baby Jogger", ovs) + from_joie() + from_manual(base) + from_superpharm()
     conflicts = name_facts(rows)
+    for r in rows:
+        r["family"] = family(r)
+    importer_fill(rows)
+    maker_fill(rows)
     for r in rows:
         r["family"] = family(r)
     rows = merge_colours(rows)
