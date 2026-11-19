@@ -721,7 +721,7 @@ function closeInfo(){
 }
 // vouchers: one on the card (BuyMe first, then All-In Zone, then Tav Hazahav), the full list in a dialog
 const VPRI=["BuyMe ALL","הייטקזון All-In Zone","תו הזהב"];
-const vrank=n=>{ const k=VPRI.indexOf(n); return k<0? 99 : k; };
+const vrank=n=>{ if(S.clubs.has(n)) return -1; const k=VPRI.indexOf(n); return k<0? 99 : k; };   // a voucher the user picked comes first
 const sortV=l=>[...l].sort((a,b)=>vrank(a.n)-vrank(b.n) || a.n.localeCompare(b.n,"he"));
 const vOf=s=>sortV((CLUBS[s]||[]).filter(c=>c.k==="voucher"));
 const moreV=(o,n)=> n>1 ? `<button class="more-v" type="button" data-vlist="${esc(o.s)}" data-vname="${esc(o.sn)}">+${n-1} תווים נוספים</button>` : "";
