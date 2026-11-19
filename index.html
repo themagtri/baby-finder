@@ -261,6 +261,11 @@ table.cmp .cb,.fav-list .cb{display:block;font-size:.72rem;letter-spacing:.08em;
 .dlg-video{position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000;margin:6px 0 10px}
 .dlg-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .clubs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.8rem}
+.more-v{border:0;background:none;color:var(--navy);text-decoration:underline;text-underline-offset:3px;font:inherit;font-size:.8rem;font-weight:600;cursor:pointer;padding:6px 2px;min-height:32px}
+.v-dlg{width:min(440px,calc(100vw - 32px))!important}
+.v-list{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}
+.v-list li{border:1px solid var(--line);border-radius:12px;padding:9px 12px;font-weight:600}
+.v-list small{color:var(--muted);font-weight:400;margin-inline-start:6px}
 .clubs .lbl2{color:var(--muted)}
 .club{background:var(--paper);color:var(--ink);border:1px dashed var(--line-strong);border-radius:8px;padding:1px 9px;font-weight:600;font-size:.78rem}
 .badge{font-size:.68rem;font-weight:700;letter-spacing:.08em;border-radius:10px;padding:4px 10px;background:var(--paper)}
@@ -419,6 +424,12 @@ body.still *{animation:none!important;transition:none!important}
   <h2 id="cmpTitle">ההשוואה שלי</h2>
   <label class="toggle"><input type="checkbox" id="cmpOnly"> להציג רק את ההבדלים</label>
   <div id="cmpBody"></div>
+</dialog>
+<dialog id="vDlg" class="wide-dlg v-dlg" aria-labelledby="vTitle">
+  <button class="dlg-x" type="button" data-close="vDlg" aria-label="סגירה">×</button>
+  <h2 id="vTitle">תשלום בתווים</h2>
+  <p class="dlg-note">לפי דפי החנות. תנאים (מבצעים, כפל הנחות, סכום) בדקו באתר החנות.</p>
+  <div id="vBody"></div>
 </dialog>
 <dialog id="favDlg" class="wide-dlg" aria-labelledby="favTitle">
   <button class="dlg-x" type="button" data-close="favDlg" aria-label="סגירה">×</button>
@@ -701,12 +712,16 @@ function closeInfo(){
   if(d.open) d.close();
   if(infoOpener) infoOpener.focus();
 }
+// vouchers: one on the card (BuyMe first, then All-In Zone, then Tav Hazahav), the full list in a dialog
+const VPRI=["BuyMe ALL","הייטקזון All-In Zone","תו הזהב"];
+const vrank=n=>{ const k=VPRI.indexOf(n); return k<0? 99 : k; };
+const sortV=l=>[...l].sort((a,b)=>vrank(a.n)-vrank(b.n) || a.n.localeCompare(b.n,"he"));
+const vOf=s=>sortV((CLUBS[s]||[]).filter(c=>c.k==="voucher"));
+const moreV=(o,n)=> n>1 ? `<button class="more-v" type="button" data-vlist="${esc(o.s)}" data-vname="${esc(o.sn)}">+${n-1} תווים נוספים</button>` : "";
 function clubTags(i){
-  const cs = CLUBS[i.s]||[];
-  if(!cs.length) return "";
-  const v=cs.filter(c=>c.k==="voucher"), d=cs.filter(c=>c.k!=="voucher");
-  const row=(lbl,list)=> list.length ? `<span class="lbl2">${lbl}</span>${list.map(c=>`<span class="club">${esc(c.n)}${c.on===0?' <small>(בחנויות בלבד)</small>':""}</span>`).join("")}` : "";
-  return `<div class="clubs">${row("אפשר לשלם ב:",v)}${row("הטבה במועדון:",d)}</div>`;
+  const v=vOf(i.s); if(!v.length) return "";
+  const c=v[0];
+  return `<div class="clubs"><span class="lbl2">אפשר לשלם ב:</span><span class="club">${esc(c.n)}${c.on===0?' <small>(בחנויות בלבד)</small>':""}</span>${moreV(i,v.length)}</div>`;
 }
 // the brand is already shown above the name (logo / ellipse), so drop it from the start of the name
 function title(i){
@@ -732,8 +747,8 @@ function groups(list){
 }
 const homeOnly = u => /^https?:\/\/[^/]+\/?$/.test(u||"");
 function offerRow(o, first){
-  const cl=(CLUBS[o.s]||[]).filter(c=>c.k==="voucher").map(c=>esc(c.n)+(c.on===0?" (בחנויות)":"")).join(" · ");
-  return `<li class="offer${first?" best":""}"><span><span class="os">${esc(o.sn)}</span>${cl? `<span class="oc">תווים: ${cl}</span>`:""}</span>
+  const v=vOf(o.s), cl=v.length? esc(v[0].n)+(v[0].on===0?" (בחנויות)":"") : "";
+  return `<li class="offer${first?" best":""}"><span><span class="os">${esc(o.sn)}</span>${cl? `<span class="oc">תווים: ${cl} ${moreV(o,v.length)}</span>`:""}</span>
     <span class="op">${o.p!=null? shekel(o.p) : "מחיר לא מופיע"}${o.pn? ` <small>(${esc(o.pn)})</small>`:""}</span></li>`;
 }
 // owner, 19.11.2026: when the cheapest store does not take a voucher that another store on the card takes, say where it is accepted
@@ -912,6 +927,11 @@ function renderFav(){
       <button class="cmp-x" type="button" data-fav="${esc(g.key)}" aria-label="הסרה מהמועדפים: ${esc(title(g.rep))}">×</button></div></li>`).join("")}</ul>`
     : '<p class="dlg-note">אין עדיין מועדפים. לחצו על הלב בכרטיס.</p>';
 }
+function openV(s, name, opener){
+  $("#vTitle").textContent = "תשלום בתווים · "+name;
+  $("#vBody").innerHTML = `<ul class="v-list">${vOf(s).map(c=>`<li>${esc(c.n)}${c.on===0?' <small>בחנויות בלבד</small>':c.on===1?' <small>גם באתר</small>':""}</li>`).join("")}</ul>`;
+  showDlg("vDlg", opener);
+}
 function openFav(opener){ renderFav(); showDlg("favDlg", opener); }
 
 function renderResults(){
@@ -984,6 +1004,7 @@ document.addEventListener("click", e=>{
   if(b.dataset.leavek){ const g=ALLG.get(b.dataset.leavek); if(g) openLeaveG(g, b); return; }
   if(b.id==="trayCmp"){ openCmp(b); return; }
   if(b.id==="trayFav"){ openFav(b); return; }
+  if(b.dataset.vlist){ openV(b.dataset.vlist, b.dataset.vname, b); return; }
   if(b.dataset.close){ closeDlg(b.dataset.close); return; }
   if(b.dataset.aio!==undefined){ S.aio = b.dataset.aio==="1"; rerender(); return; }
 });
@@ -991,7 +1012,7 @@ function rerender(){ if(S.step===2) renderPrefs(); if(S.step===3) renderClubPick
 $("#infoClose").addEventListener("click", closeInfo);
 $("#leaveClose").addEventListener("click", closeLeave);
 $("#cmpOnly").addEventListener("change", renderCmp);
-["cmpDlg","favDlg"].forEach(id=>{ const d=$("#"+id);
+["cmpDlg","favDlg","vDlg"].forEach(id=>{ const d=$("#"+id);
   d.addEventListener("cancel", e=>{ e.preventDefault(); closeDlg(id); });
   d.addEventListener("click", e=>{ if(e.target===d) closeDlg(id); }); });
 refreshMarks();
