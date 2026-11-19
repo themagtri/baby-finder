@@ -801,7 +801,7 @@ function card(g, idx){
     ? `<div class="price">${n>1? `<span class="pn">הכי זול מבין ${n} מוכרים</span>`:""}<span class="now">${shekel(i.p)}</span>${n===1&&i.pr? `<s><span class="sr-only">מחיר רגיל </span>${shekel(i.pr)}</s>`:""}${n===1&&i.pn? `<span class="pn">${esc(i.pn)}</span>`:""}</div>`
     : `<div class="price none">המחיר לא מופיע באתר המוכר</div>`;
   const offers = n>1
-    ? `<ul class="offers" aria-label="המחיר אצל כל מוכר"><li class="offers-h" aria-hidden="true">המחיר אצל כל מוכר</li>${g.offers.map((o,k)=>offerRow(o,k===0)).join("")}</ul>${voucherNote(g)}`
+    ? `<ul class="offers" aria-label="המחיר אצל כל מוכר"><li class="offers-h" aria-hidden="true">המחיר אצל כל מוכר</li>${g.offers.map((o,k)=>offerRow(o,k===0)).join("")}</ul>`
     : `${clubTags(i)}<div class="seller"><span>נמכר ב: <b>${esc(i.sn)}</b>${isSponSeller(i.s)? " "+SP_TAG:""}</span></div>`;
   CARDS[idx]=g;
   const sub = n>1 ? (i.d||"").replace(/מגוון צבעים \(\d+\)/, "מגוון צבעים") : i.d;   // the colour count belongs to one seller
