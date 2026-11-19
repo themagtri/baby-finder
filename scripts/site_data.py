@@ -41,6 +41,16 @@ def main():
                 clubs.setdefault(r["seller"], []).append({"n": r["club"], "k": r.get("kind") or "club", "src": r["source_url"], "chk": r.get("checked") or None,
                                                                "on": {"1": 1, "0": 0}.get(r.get("online") or "")})
     js += "window.CLUBS = " + json.dumps(clubs, ensure_ascii=False, separators=(",", ":")) + ";\n"
+    # paid placements (data/sponsored.csv). Dates are checked in the browser, so a campaign starts and ends on its
+    # own without a rebuild. Every placement is labelled "ממומן" on the site.
+    spon = []
+    sp = ROOT / "data" / "sponsored.csv"
+    if sp.exists():
+        with open(sp, encoding="utf-8") as f:
+            for r in csv.DictReader(f):
+                if r.get("placement") in ("top", "seller", "tile") and r.get("target") and r.get("start") and r.get("end"):
+                    spon.append({k: (r.get(k) or "").strip() for k in ("placement", "target", "cat", "start", "end", "title", "subtitle", "image", "advertiser")})
+    js += "window.SPONSORED = " + json.dumps(spon, ensure_ascii=False, separators=(",", ":")) + ";\n"
     (ROOT / "data.js").write_text(js, encoding="utf-8")
     print(f"data.js: {len(items)} items")
 

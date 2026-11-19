@@ -284,6 +284,10 @@ table.cmptab .cb,.fav-list .cb{display:block;font-size:.72rem;letter-spacing:.08
 .badge.save{background:var(--sage)}
 .badge.oos{background:var(--blush)}
 .badge.sp{background:var(--navy);color:#fff}
+.badge.sm{font-size:.62rem;padding:2px 7px;vertical-align:middle;letter-spacing:.04em}
+.item.is-sp{outline:2px solid var(--navy);outline-offset:-2px}
+.spon-tiles{margin-top:14px}
+.spon-tiles .cnt{background:var(--navy);color:#fff}
 .badge.imp{background:var(--sky);color:var(--navy)}
 .badge.aio{background:var(--ink);color:var(--paper)}
 .item .body{padding:16px;display:flex;flex-direction:column;gap:10px;flex:1}
@@ -373,6 +377,7 @@ body.still *{animation:none!important;transition:none!important}
     </div>
     <h2 class="q">מה אתם מחפשים?</h2>
     <div class="tiles two" id="needOpts"></div>
+    <div class="tiles two spon-tiles" id="sponTiles" hidden></div>
     <p class="photo-credit">צילומים להמחשה: Unsplash</p>
   </section>
 
@@ -630,6 +635,9 @@ function renderHome(){
   $("#hero").style.cssText = BG(PH.hero,1600);
   const sellers=new Set(ITEMS.map(i=>i.s)).size, brands=new Set(ITEMS.map(i=>i.b)).size;
   $("#heroVals").innerHTML = `<li>${sellers} חנויות, ${brands} מותגים, ${nf.format(ITEMS.length)} מוצרים</li><li>כל המחירים של דגם בכרטיס אחד</li><li>סינון לפי תווי קנייה</li>`;
+  const st = SPON.map((s,k)=>[s,k]).filter(([s])=>s.placement==="tile" && s.target.startsWith("brand:") && (s.cat==="stroller"||s.cat==="carseat"));
+  $("#sponTiles").hidden = !st.length;
+  $("#sponTiles").innerHTML = st.map(([s,k])=>tile(`data-spon="${k}"`, s.image||PH[s.cat], esc(s.title||s.target.slice(6)), esc(s.subtitle||""), "ממומן", false)).join("");
   $("#needOpts").innerHTML = NEEDS.map(n=>tile(`data-need="${n.k}"`, PH[n.k], n.he, n.sub, nf.format(ITEMS.filter(i=>i.c===n.k).length)+" מוצרים", S.need===n.k)).join("");
 }
 function renderPrefs(){
@@ -762,7 +770,7 @@ function groups(list){
 const homeOnly = u => /^https?:\/\/[^/]+\/?$/.test(u||"");
 function offerRow(o, first){
   const v=vOf(o.s), cl=v.length? esc(v[0].n)+(v[0].on===0?" (בחנויות)":"") : "";
-  return `<li class="offer${first?" best":""}"><span><span class="os">${esc(o.sn)}</span>${cl? `<span class="oc">תווים: ${cl} ${moreV(o,v.length)}</span>`:""}</span>
+  return `<li class="offer${first?" best":""}"><span><span class="os">${esc(o.sn)}</span>${isSponSeller(o.s)? " "+SP_TAG:""}${cl? `<span class="oc">תווים: ${cl} ${moreV(o,v.length)}</span>`:""}</span>
     <span class="op">${o.p!=null? shekel(o.p) : "מחיר לא מופיע"}${o.pn? ` <small>(${esc(o.pn)})</small>`:""}</span></li>`;
 }
 // owner, 19.11.2026: when the cheapest store does not take a voucher that another store on the card takes, say where it is accepted
@@ -785,7 +793,7 @@ function card(g, idx){
   const i=g.rep, n=g.offers.length;
   const ik = i.c==="carseat" ? "g_"+(i.g||"toddler") : "t_"+(i.t||"stroller");
   const badges = [
-    g.offers.some(o=>o.sp) ? '<span class="badge sp">ממומן</span>' : "",
+    (g.spon || g.offers.some(o=>o.sp)) ? '<span class="badge sp">ממומן</span>' : "",
     isAIO(i) ? '<span class="badge aio">לכל הגילאים · All in One</span>' : "",
     n===1 && i.imp==="official" ? '<span class="badge imp">יבואן רשמי, לפי המוכר</span>' : n===1 && i.imp==="parallel" ? '<span class="badge imp">יבוא מקביל, לפי המוכר</span>' : "",
   ].join("");
@@ -794,11 +802,11 @@ function card(g, idx){
     : `<div class="price none">המחיר לא מופיע באתר המוכר</div>`;
   const offers = n>1
     ? `<ul class="offers" aria-label="המחיר אצל כל מוכר"><li class="offers-h" aria-hidden="true">המחיר אצל כל מוכר</li>${g.offers.map((o,k)=>offerRow(o,k===0)).join("")}</ul>${voucherNote(g)}`
-    : `${clubTags(i)}<div class="seller"><span>נמכר ב: <b>${esc(i.sn)}</b></span></div>`;
+    : `${clubTags(i)}<div class="seller"><span>נמכר ב: <b>${esc(i.sn)}</b>${isSponSeller(i.s)? " "+SP_TAG:""}</span></div>`;
   CARDS[idx]=g;
   const sub = n>1 ? (i.d||"").replace(/מגוון צבעים \(\d+\)/, "מגוון צבעים") : i.d;   // the colour count belongs to one seller
   const fv=FAV.has(g.key), cm=CMP.includes(g.key);
-  return `<article class="item">
+  return `<article class="item${g.spon?" is-sp":""}">
     <button class="fav-btn" type="button" data-fav="${esc(g.key)}" aria-pressed="${fv}" aria-label="${fv?"הסרה מהמועדפים":"הוספה למועדפים"}: ${esc(title(i))}">${HEART}</button>
     <div class="body">
       <div class="head">${icon(ik)}<span class="brand">${LOGOS[i.b]? `<img class="logo-img" src="${LOGOS[i.b]}" alt="${esc(i.b)}" loading="lazy">` : i.b ? `<span class="brand-pill">${esc(i.b)}</span>` : ""}</span><h3>${esc(title(i))}</h3>${sub? `<p class="sub">${esc(sub)}</p>`:""}</div>
@@ -818,7 +826,7 @@ function openLeaveG(g, opener){
   const i=g.rep;
   $("#leaveWhat").innerHTML = `${i.b? esc(i.b)+" · ":""}${esc(title(i))}<small>${g.offers.length>1? g.offers.length+" מוכרים, מהזול ליקר" : esc(i.sn)}</small>`;
   $("#leaveList").innerHTML = g.offers.map(o=>`<a class="leave-go" href="${esc(o.u)}" target="_blank" rel="noopener nofollow" data-out="${esc(o.s)}">
-      <span>${esc(o.sn)}${homeOnly(o.u)? "<small>לאתר החנות, חפשו שם את הדגם</small>" : /\/search\/\?q=/.test(o.u)? "<small>חיפוש הדגם באתר החנות</small>" : o.pn? `<small>${esc(o.pn)}</small>`:""}</span>
+      <span>${esc(o.sn)}${isSponSeller(o.s)? " "+SP_TAG:""}${homeOnly(o.u)? "<small>לאתר החנות, חפשו שם את הדגם</small>" : /\/search\/\?q=/.test(o.u)? "<small>חיפוש הדגם באתר החנות</small>" : o.pn? `<small>${esc(o.pn)}</small>`:""}</span>
       <span class="lp">${o.p!=null? shekel(o.p) : "—"} <span aria-hidden="true">↗</span></span><span class="sr-only"> (נפתח בלשונית חדשה)</span></a>`).join("");
   const d=$("#leaveDlg"); if(d.showModal) d.showModal(); else d.setAttribute("open","");
   $("#leaveList a").focus();
@@ -968,6 +976,22 @@ function openV(s, name, opener){
 }
 function openFav(opener){ renderFav(); showDlg("favDlg", opener); }
 
+/* ---------- paid placements (data/sponsored.csv -> window.SPONSORED), always labelled "ממומן" ----------
+   top    : target = a model family (data.js "fm") or "brand:<name>"; up to SPON_TOP such cards open the results,
+            only when they match the current search, and leave their place in the regular order
+   seller : target = seller id; that store gets a "ממומן" tag on cards and in the leave dialog (order unchanged)
+   tile   : target = "brand:<name>", cat = stroller|carseat; a home-page tile that opens that brand's results */
+const SPON_TOP = 2;
+const TODAY = new Date().toISOString().slice(0,10);
+const SPON = (window.SPONSORED||[]).filter(s=>s.start<=TODAY && TODAY<=s.end);
+const sponSellers = new Set(SPON.filter(s=>s.placement==="seller").map(s=>s.target));
+const isSponSeller = s => sponSellers.has(s);
+function sponTopMatch(g){
+  return SPON.some(s=>s.placement==="top" && (!s.cat || s.cat===g.rep.c) &&
+    (s.target.startsWith("brand:") ? (g.rep.b||"").toLowerCase()===s.target.slice(6).toLowerCase() : g.rep.fm===s.target));
+}
+const SP_TAG = '<span class="badge sp sm">ממומן</span>';
+
 function renderResults(){
   const {list, hiddenUnknown} = filtered();
   const aioLast = S.need==="carseat" && S.stage && S.stage!=="infant";
@@ -982,6 +1006,9 @@ function renderResults(){
     if(a.p==null && b.p==null) return 0; if(a.p==null) return 1; if(b.p==null) return -1;
     return S.sort==="high" ? b.p-a.p : a.p-b.p;
   });
+  const spTop = sorted.filter(sponTopMatch).slice(0, SPON_TOP);
+  spTop.forEach(g=>{ g.spon=true; sorted.splice(sorted.indexOf(g),1); });
+  sorted.unshift(...spTop);
   $("#resTitle").textContent = S.need==="carseat" ? "מושבי בטיחות שמתאימים לכם" : "עגלות שמתאימות לכם";
   $("#resCount").textContent = `${nf.format(sorted.length)} דגמים · אותו דגם אצל כמה מוכרים מופיע בכרטיס אחד`;
   $("#sortSel").value = S.sort;
@@ -1025,6 +1052,9 @@ document.addEventListener("click", e=>{
   const b=e.target.closest("button"); if(!b || b.closest("#a11yPanel")) return;
   if(b.dataset.info){ openInfo(b.dataset.info, b); return; }
   if(b.dataset.leave!==undefined){ openLeave(+b.dataset.leave, b); return; }
+  if(b.dataset.spon!==undefined){ const s=SPON[+b.dataset.spon]; if(!s) return; reset(); S.need=s.cat; S.brands.add(s.target.slice(6));
+    const real=[...new Set(ITEMS.map(i=>i.b))].find(x=>(x||"").toLowerCase()===s.target.slice(6).toLowerCase()); if(real){ S.brands.clear(); S.brands.add(real); }
+    renderHome(); go(4); return; }
   if(b.dataset.need){ if(S.need!==b.dataset.need){ reset(); S.need=b.dataset.need; } renderHome(); go(2); return; }
   if(b.dataset.go){ go(+b.dataset.go); return; }
   if(b.classList.contains("restart")){ reset(); renderHome(); go(1); return; }
