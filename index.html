@@ -182,7 +182,12 @@ section.screen.on{display:block;animation:fade .35s ease}
 .tray{position:sticky;top:84px;z-index:49;display:flex;justify-content:center;gap:8px;margin:8px auto 0;pointer-events:none}
 .tray[hidden]{display:none}
 .tray-btn{pointer-events:auto;border:0;border-radius:999px;background:var(--navy);color:#fff;font:inherit;font-weight:600;padding:9px 16px;min-height:44px;box-shadow:var(--shadow);cursor:pointer}
-.tray-btn[hidden]{display:none}
+.tray-btn[hidden],.tray-x[hidden],.tray-mini[hidden]{display:none}
+.tray{align-items:center}
+.tray-x{pointer-events:auto;width:32px;height:32px;margin-inline-start:6px;border-radius:50%;border:1px solid var(--line-strong);background:var(--paper);color:var(--muted);font-size:1.05rem;line-height:1;cursor:pointer;box-shadow:var(--shadow)}
+.tray-x:hover{color:var(--ink);border-color:var(--ink)}
+.tray-mini{pointer-events:auto;border:1px solid var(--line-strong);border-radius:999px;background:var(--paper);color:var(--navy);font:inherit;font-size:.82rem;font-weight:700;padding:6px 12px;min-height:36px;box-shadow:var(--shadow);cursor:pointer}
+.tray-mini .h{color:#c2334d}
 .tray-btn .h{color:#ffb3c0}
 .wide-dlg{width:min(900px,calc(100vw - 24px))!important}
 .wide-dlg h2{margin:0 0 8px;padding-inline-end:40px}
@@ -333,6 +338,8 @@ body.still *{animation:none!important;transition:none!important}
 <div class="tray" id="tray" hidden>
   <button class="tray-btn" type="button" id="trayCmp" hidden><span aria-hidden="true">⚖</span> ההשוואה שלי (<span class="n">0</span>)</button>
   <button class="tray-btn" type="button" id="trayFav" hidden><span class="h" aria-hidden="true">♥</span> מועדפים (<span class="n">0</span>)</button>
+  <button class="tray-x" type="button" id="trayHide" aria-label="מזעור הכפתורים של ההשוואה והמועדפים">×</button>
+  <button class="tray-mini" type="button" id="trayShow" hidden aria-label="הצגת ההשוואה והמועדפים"><span aria-hidden="true" id="miniTxt"></span></button>
 </div>
 <p class="sr-only" id="trayMsg" role="status" aria-live="polite"></p>
 <div class="a11y-panel" id="a11yPanel" role="dialog" aria-label="הגדרות נגישות" hidden>
@@ -864,7 +871,7 @@ function say(msg){ const s=$("#trayMsg"); s.textContent=""; setTimeout(()=>{ s.t
 function toggleFav(k){
   const g=ALLG.get(k); if(!g) return;
   if(FAV.has(k)){ FAV.delete(k); say("הוסר מהמועדפים"); } else { FAV.add(k); say("נוסף למועדפים"); }
-  save("bf_fav",[...FAV]); refreshMarks(); if($("#favDlg").open) renderFav();
+  save("bf_fav",[...FAV]); if(FAV.has(k)) TRAY_MIN=false; refreshMarks(); if($("#favDlg").open) renderFav();
 }
 function toggleCmp(k){
   const g=ALLG.get(k); if(!g) return;
@@ -875,7 +882,7 @@ function toggleCmp(k){
     if(CMP.length>=CMP_MAX){ say(`אפשר להשוות עד ${CMP_MAX} דגמים. הסירו אחד כדי להוסיף`); return; }
     CMP.push(k); if(!other) say(`נוסף להשוואה (${CMP.length})`);
   }
-  save("bf_cmp",CMP); refreshMarks(); if($("#cmpDlg").open) renderCmp();
+  save("bf_cmp",CMP); if(CMP.includes(k)) TRAY_MIN=false; refreshMarks(); if($("#cmpDlg").open) renderCmp();
 }
 function refreshMarks(){
   document.querySelectorAll("[data-fav]").forEach(b=>{ if(b.classList.contains("fav-btn")){ const on=FAV.has(b.dataset.fav); b.setAttribute("aria-pressed",on);
@@ -884,7 +891,14 @@ function refreshMarks(){
   $("#trayCmp").hidden=!CMP.length; $("#trayCmp .n").textContent=CMP.length;
   $("#trayFav").hidden=!FAV.size; $("#trayFav .n").textContent=FAV.size;
   $("#tray").hidden = !CMP.length && !FAV.size;
+  // minimised: one small pill instead of the two buttons (kept for this visit; adding something opens it again)
+  $("#trayCmp").hidden = TRAY_MIN || !CMP.length; $("#trayFav").hidden = TRAY_MIN || !FAV.size;
+  $("#trayHide").hidden = TRAY_MIN; $("#trayShow").hidden = !TRAY_MIN;
+  $("#miniTxt").innerHTML = [CMP.length? `⚖ ${CMP.length}` : "", FAV.size? `<span class="h">♥</span> ${FAV.size}` : ""].filter(Boolean).join(" · ");
 }
+let TRAY_MIN=false;
+try{ TRAY_MIN = sessionStorage.getItem("bf_traymin")==="1"; }catch(e){}
+function setTrayMin(v, focusId){ TRAY_MIN=v; try{ sessionStorage.setItem("bf_traymin", v?"1":"0"); }catch(e){} refreshMarks(); if(focusId) $("#"+focusId).focus(); }
 const dlgOpener={};
 function showDlg(id, opener){ dlgOpener[id]=opener; const d=$("#"+id); if(d.showModal) d.showModal(); else d.setAttribute("open",""); d.querySelector(".dlg-x").focus(); }
 function closeDlg(id){ const d=$("#"+id); if(d.open) d.close(); const o=dlgOpener[id]; if(o && document.contains(o)) o.focus(); }
@@ -1022,6 +1036,8 @@ document.addEventListener("click", e=>{
   if(b.dataset.fav){ toggleFav(b.dataset.fav); return; }
   if(b.dataset.cmp){ toggleCmp(b.dataset.cmp); return; }
   if(b.dataset.leavek){ const g=ALLG.get(b.dataset.leavek); if(g) openLeaveG(g, b); return; }
+  if(b.id==="trayHide"){ setTrayMin(true, "trayShow"); return; }
+  if(b.id==="trayShow"){ setTrayMin(false, CMP.length? "trayCmp" : "trayFav"); return; }
   if(b.id==="trayCmp"){ openCmp(b); return; }
   if(b.id==="trayFav"){ openFav(b); return; }
   if(b.dataset.vlist){ openV(b.dataset.vlist, b.dataset.vname, b); return; }
