@@ -120,6 +120,10 @@ section.screen.on{display:block;animation:fade .35s ease}
 .budget{display:grid;grid-template-columns:1.1fr .9fr;gap:22px;align-items:stretch}
 @media (max-width:820px){.budget{grid-template-columns:1fr}}
 .panel{background:var(--paper);border-radius:var(--r);padding:26px;box-shadow:var(--shadow)}
+.club-pick{margin-top:22px}
+.club-pick .lbl-lg{font-size:1.1rem;margin:0 0 4px}
+.club-pick .hint{color:var(--muted);margin:0 0 14px;font-size:.92rem}
+.opt .no{width:1.05em;height:1.05em;vertical-align:-.15em;margin-inline-end:6px}
 .panel output{font-family:var(--serif);font-size:2.4rem;font-weight:300;display:block;margin:4px 0 10px}
 .panel input[type=range]{width:100%;accent-color:var(--navy);height:28px}
 .ends{display:flex;justify-content:space-between;color:var(--muted);font-size:.82rem}
@@ -320,12 +324,19 @@ body.still *{animation:none!important;transition:none!important}
     <h1 id="h3a">מה התקציב?</h1>
     <p class="lead">המחיר הוא המחיר שמופיע באתר המוכר ביום הבדיקה, כולל מבצעים שפעילים באותו יום.</p>
     <div class="budget">
+      <div class="budget-main">
       <div class="panel">
         <label for="maxPrice">מחיר מקסימלי</label>
         <output id="maxOut" for="maxPrice" aria-live="polite"></output>
         <input type="range" id="maxPrice" min="0" max="5000" step="50">
         <div class="ends"><span id="minEnd"></span><span id="maxEnd"></span></div>
         <label class="toggle"><input type="checkbox" id="noPrice" checked> להציג גם מוצרים בלי מחיר באתר</label>
+      </div>
+      <div class="panel club-pick" id="clubPick" role="group" aria-labelledby="clubPickH" hidden>
+        <h2 class="lbl-lg" id="clubPickH">יש לכם תווי קנייה או כרטיס מועדון?</h2>
+        <p class="hint">אפשר לבחור יותר מאחד. נציג רק חנויות שמקבלות לפחות אחד מהם.</p>
+        <div class="opt-row" id="clubOpts"></div>
+      </div>
       </div>
       <div class="photo-panel" id="budgetPhoto" role="img" aria-label="תמונה להמחשה: כפות רגליים של תינוק"></div>
     </div>
@@ -558,6 +569,14 @@ function renderBudget(){
   $("#minEnd").textContent=shekel(lo); $("#maxEnd").textContent=shekel(hi);
   updateMaxOut();
   $("#noPrice").checked=S.noprice;
+  renderClubPick();
+}
+// vouchers / club cards the user has: "אין" (default) or one or more; same filter as on the results screen
+const NO_ICON='<svg class="no" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>';
+function renderClubPick(){
+  $("#clubPick").hidden = !CLUB_NAMES.length;
+  $("#clubOpts").innerHTML = `<button class="opt" type="button" data-club="" aria-pressed="${!S.clubs.size}">${NO_ICON}אין</button>`+
+    CLUB_NAMES.map(n=>`<button class="opt" type="button" data-club="${esc(n)}" aria-pressed="${S.clubs.has(n)}">${esc(n)}</button>`).join("");
 }
 function updateMaxOut(){
   const hi=+$("#maxPrice").max;
@@ -717,7 +736,7 @@ function renderRefine(){
     html += `<div><div class="lbl">גיל</div><div class="opt-row small"><button class="opt" type="button" data-stage="" aria-pressed="${!S.stage}">הכל</button>`+
       STAGES.map(s=>`<button class="opt" type="button" data-stage="${s.k}" aria-pressed="${S.stage===s.k}">${s.he}</button>`).join("")+`</div></div>`;
   }
-  if(CLUB_NAMES.length) html += `<div><div class="lbl">תו / מועדון שיש לי</div><div class="opt-row small"><button class="opt" type="button" data-club="" aria-pressed="${!S.clubs.size}">לא משנה</button>`+
+  if(CLUB_NAMES.length) html += `<div><div class="lbl">תו / מועדון שיש לי</div><div class="opt-row small"><button class="opt" type="button" data-club="" aria-pressed="${!S.clubs.size}">${NO_ICON}אין</button>`+
       CLUB_NAMES.map(n=>`<button class="opt" type="button" data-club="${esc(n)}" aria-pressed="${S.clubs.has(n)}">${esc(n)}</button>`).join("")+`</div></div>`;
   if(S.need==="carseat" && S.stage!=="infant" && S.stage!=="aio")
     html += `<div><div class="lbl">סוג כסא</div><div class="opt-row small"><button class="opt" type="button" data-aio="" aria-pressed="${!S.aio}">הכל</button><button class="opt" type="button" data-aio="1" aria-pressed="${!!S.aio}">All in One בלבד</button></div></div>`;
@@ -751,7 +770,7 @@ function renderChips(){
   if(S.need==="stroller" && S.types.size) c.push([...S.types].map(k=>TYPES.find(t=>t.k===k).he).join(", "));
   if(S.need==="carseat" && S.stage) c.push(STAGES.find(s=>s.k===S.stage).he);
   if(S.need==="carseat") for(const k of S.reqs) c.push(REQS.find(r=>r.k===k).he);
-  for(const k of S.clubs) c.push("מועדון: "+k);
+  for(const k of S.clubs) c.push("תו / מועדון: "+k);
   if(S.step>=3 && S.max!=null && S.max<+$("#maxPrice").max) c.push("עד "+shekel(S.max));
   $("#chips").innerHTML=c.map(x=>`<span class="chip">${x}</span>`).join("");
 }
@@ -780,7 +799,7 @@ document.addEventListener("click", e=>{
   if(b.dataset.club!==undefined){ const k=b.dataset.club; if(!k) S.clubs.clear(); else S.clubs.has(k)? S.clubs.delete(k) : S.clubs.add(k); rerender(); return; }
   if(b.dataset.aio!==undefined){ S.aio = b.dataset.aio==="1"; rerender(); return; }
 });
-function rerender(){ if(S.step===2) renderPrefs(); if(S.step===4) renderResults(); renderChips(); renderBar(); }
+function rerender(){ if(S.step===2) renderPrefs(); if(S.step===3) renderClubPick(); if(S.step===4) renderResults(); renderChips(); renderBar(); }
 $("#infoClose").addEventListener("click", closeInfo);
 $("#leaveClose").addEventListener("click", closeLeave);
 $("#leaveDlg").addEventListener("cancel", e=>{ e.preventDefault(); closeLeave(); });
